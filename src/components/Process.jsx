@@ -3,35 +3,47 @@ import { workingProcess } from '../data/projects';
 
 export default function Process() {
   return (
-    <section id="process" className="process-section" aria-label="Development Process">
+    <section id="process" className="process-workflow-section" aria-label="Development Process">
       <div className="container">
+        {/* Section Header */}
         <div className="section-header-wrap">
           <div className="section-pretitle">
             <span className="studio-tag">METHODOLOGY</span>
             <span style={{ color: 'var(--border-medium)' }}>/</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              FOUR STAGES
+              FOUR DISCIPLINED STAGES
             </span>
           </div>
-          <h2 className="section-title-large">
-            A transparent, <span className="highlight-serif">four-stage journey</span>.
+          <h2 className="process-monument-title">
+            HOW THE WORK GOES
           </h2>
           <p className="section-lead">
-            Every build follows a clear progression from initial alignment to cross-device refinement.
-            No guesswork, no sudden delays, and zero surprises.
+            Every project follows a transparent four-stage progression from discovery to final cross-device
+            refinement. Clear milestones, continuous visibility, and zero guesswork.
           </p>
         </div>
 
-        <div className="process-steps-grid" role="list">
-          {workingProcess.map((item) => (
-            <div key={item.step} className="process-step-card" role="listitem">
-              <div className="process-step-indicator">
-                <span className="process-number">/{item.step}</span>
-                <span className="process-phase">{item.phase}</span>
+        {/* Circular Stepper Row (Demo.mp4 Style) */}
+        <div className="process-stepper-track" role="list">
+          <div className="stepper-horizontal-line" aria-hidden="true"></div>
+
+          {workingProcess.map((item, idx) => (
+            <div key={item.step} className="process-step-node" role="listitem">
+              {/* Circular Number Badge */}
+              <div className={`process-circle-badge ${idx === 2 ? 'is-highlighted' : ''}`}>
+                <span className="badge-step-num">{item.step}</span>
+                <span className="badge-step-sub">{item.phase}</span>
               </div>
-              <h3 className="process-step-title">{item.title}</h3>
-              <p className="process-step-desc">{item.description}</p>
-              <p className="process-step-action">{item.action}</p>
+
+              {/* Step Info */}
+              <div className="process-node-body">
+                <h3 className="process-node-title">{item.title}</h3>
+                <p className="process-node-desc">{item.description}</p>
+                <div className="process-node-action-box">
+                  <span className="process-action-label">EXECUTION:</span>
+                  <p className="process-action-text">{item.action}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

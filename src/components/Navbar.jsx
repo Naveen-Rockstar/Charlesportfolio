@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Menu, X, ArrowRight } from 'lucide-react';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { contactConfig } from '../data/contactConfig';
 
 export default function Navbar({ onOpenContact }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,18 +40,19 @@ export default function Navbar({ onOpenContact }) {
   }, [mobileMenuOpen]);
 
   const navLinks = [
-    { label: 'Work', href: '#work' },
-    { label: 'Services', href: '#services' },
-    { label: 'Agencies', href: '#collaboration' },
-    { label: 'Process', href: '#process' },
-    { label: 'About', href: '#about' },
+    { label: 'Work', href: '#work', number: '01' },
+    { label: 'Capabilities', href: '#services', number: '02' },
+    { label: 'Impact', href: '#impact', number: '03' },
+    { label: 'Agencies', href: '#collaboration', number: '04' },
+    { label: 'Process', href: '#process', number: '05' },
+    { label: 'About', href: '#about', number: '06' },
   ];
 
   const handleLinkClick = (e, href) => {
+    e.preventDefault();
     setMobileMenuOpen(false);
     const target = document.querySelector(href);
     if (target) {
-      e.preventDefault();
       target.scrollIntoView({ behavior: 'smooth' });
     }
   };
@@ -69,95 +71,137 @@ export default function Navbar({ onOpenContact }) {
   };
 
   return (
-    <header className={`navbar ${scrolled ? 'is-scrolled' : ''}`} role="banner">
-      <div className="container navbar-inner">
-        {/* Brand Link */}
-        <a href="#" className="brand-link" aria-label="Charles Naveen — Portfolio Homepage">
-          <span>CHARLES NAVEEN</span>
-          <span className="brand-dot" aria-hidden="true"></span>
-        </a>
-
-        {/* Desktop Nav */}
-        <nav className="nav-desktop" aria-label="Primary Navigation">
-          <ul className="nav-links-desktop">
-            {navLinks.map((item) => (
-              <li key={item.label}>
-                <a
-                  href={item.href}
-                  className="nav-item-link"
-                  onClick={(e) => handleLinkClick(e, item.href)}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* Desktop Primary CTA */}
-        <div className="nav-actions-desktop">
-          <a
-            ref={magneticCtaRef}
-            href="#contact"
-            className="nav-cta-btn"
-            onClick={handleTalkClick}
-            aria-label="Contact Charles Naveen — Let's Talk"
-          >
-            <span>LET'S TALK</span>
-            <ArrowUpRight size={13} aria-hidden="true" />
+    <>
+      <header className={`navbar ${scrolled ? 'is-scrolled' : ''}`} role="banner">
+        <div className="container navbar-inner">
+          {/* Brand Link */}
+          <a href="#" className="brand-link" aria-label="Charles Naveen — Portfolio Homepage">
+            <span className="brand-name">CHARLES NAVEEN</span>
+            <span className="brand-lime-dot" aria-hidden="true"></span>
           </a>
+
+          {/* Desktop Nav Links */}
+          <nav className="nav-desktop" aria-label="Primary Navigation">
+            <ul className="nav-links-desktop">
+              {navLinks.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.href}
+                    className="nav-item-link"
+                    onClick={(e) => handleLinkClick(e, item.href)}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Right Header Cluster */}
+          <div className="nav-right-cluster">
+            <div className="nav-status-indicator" role="status">
+              <span className="nav-pulse-dot" aria-hidden="true"></span>
+              <span className="nav-status-text">Available</span>
+            </div>
+
+            <a
+              ref={magneticCtaRef}
+              href="#contact"
+              className="nav-cta-pill"
+              onClick={handleTalkClick}
+              aria-label="Contact Charles Naveen — Let's Talk"
+            >
+              <span>WRITE ME</span>
+              <ArrowUpRight size={13} aria-hidden="true" />
+            </a>
+
+            {/* Menu Hamburger Toggle */}
+            <button
+              type="button"
+              className="menu-toggle-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Navigation Menu'}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
+      </header>
 
-        {/* Mobile Toggle Button */}
-        <button
-          type="button"
-          className="mobile-toggle"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-expanded={mobileMenuOpen}
-          aria-label={mobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-        >
-          {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-
-      {/* Mobile Drawer */}
+      {/* Full-Screen Editorial Menu Overlay (animation.mp4 Style) */}
       <div
-        className={`mobile-drawer ${mobileMenuOpen ? 'is-open' : ''}`}
+        className={`fullscreen-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}
         aria-hidden={!mobileMenuOpen}
       >
-        <ul className="mobile-nav-links">
-          {navLinks.map((item) => (
-            <li key={item.label} className="mobile-nav-item">
-              <a
-                href={item.href}
-                onClick={(e) => handleLinkClick(e, item.href)}
-              >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="container menu-overlay-inner">
+          <div className="menu-overlay-header">
+            <span className="overlay-brand">CHARLES NAVEEN</span>
+            <button
+              type="button"
+              className="overlay-close-btn"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close Navigation"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-        <div className="mobile-drawer-footer">
-          <button
-            type="button"
-            className="btn-magnetic-primary"
-            style={{ width: '100%' }}
-            onClick={handleTalkClick}
-          >
-            <span>START A PROJECT</span>
-            <ArrowUpRight size={16} aria-hidden="true" />
-          </button>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              Tamil Nadu, India
-            </span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--accent-primary)' }}>
-              ● Available
-            </span>
+          <div className="menu-overlay-grid">
+            <nav className="overlay-nav-column" aria-label="Overlay Navigation Links">
+              <ul className="overlay-links-list">
+                {navLinks.map((item) => (
+                  <li key={item.label} className="overlay-link-item">
+                    <a
+                      href={item.href}
+                      onClick={(e) => handleLinkClick(e, item.href)}
+                      className="overlay-anchor"
+                    >
+                      <span className="overlay-link-num">{item.number}</span>
+                      <span className="overlay-link-text">{item.label}</span>
+                      <ArrowRight size={24} className="overlay-link-arrow" aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+                <li className="overlay-link-item contact-item">
+                  <a
+                    href="#contact"
+                    onClick={handleTalkClick}
+                    className="overlay-anchor highlight"
+                  >
+                    <span className="overlay-link-num">07</span>
+                    <span className="overlay-link-text">WRITE ME</span>
+                    <ArrowUpRight size={24} className="overlay-link-arrow" aria-hidden="true" />
+                  </a>
+                </li>
+              </ul>
+            </nav>
+
+            <div className="overlay-meta-column">
+              <div className="overlay-meta-group">
+                <span className="overlay-meta-title">DIRECT INQUIRIES</span>
+                <a href={`mailto:${contactConfig.emailPlaceholder}`} className="overlay-meta-link">
+                  {contactConfig.emailPlaceholder}
+                </a>
+                <a href={`https://wa.me/${contactConfig.whatsappPlaceholder}`} target="_blank" rel="noopener noreferrer" className="overlay-meta-link">
+                  +{contactConfig.whatsappPlaceholder} (WhatsApp)
+                </a>
+              </div>
+
+              <div className="overlay-meta-group">
+                <span className="overlay-meta-title">LOCATION</span>
+                <p className="overlay-meta-text">{contactConfig.location}</p>
+                <p className="overlay-meta-subtext">Open to remote projects worldwide.</p>
+              </div>
+
+              <div className="overlay-meta-group">
+                <span className="overlay-meta-title">AVAILABILITY</span>
+                <p className="overlay-meta-text highlight-lime">● Taking on selected client builds for Q1/Q2</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </header>
+    </>
   );
 }

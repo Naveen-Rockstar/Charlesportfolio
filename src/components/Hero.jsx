@@ -1,171 +1,174 @@
-import React from 'react';
-import { ArrowUpRight, ArrowDown, ExternalLink } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { ArrowUpRight, ArrowDown, ExternalLink, Code2, Sparkles } from 'lucide-react';
 import { featuredProject } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
 
 export default function Hero({ onOpenContact, onSelectProject }) {
-  const magneticPrimaryRef = useMagnetic(0.2);
+  const magneticPrimaryRef = useMagnetic(0.25);
   const magneticSecondaryRef = useMagnetic(0.2);
+  const badgeRef = useRef(null);
 
   const handleScrollToWork = (e) => {
     e.preventDefault();
     const el = document.querySelector('#work');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleScrollToAgency = (e) => {
-    e.preventDefault();
-    const el = document.querySelector('#collaboration');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <section className="hero-section" aria-label="Charles Naveen Introduction">
+    <section className="hero-editorial-section" aria-label="Charles Naveen — Portfolio Hero">
       <div className="container">
         {/* Top Metadata Bar */}
         <div className="hero-meta-bar">
           <div className="hero-meta-left">
-            <span className="meta-identity">CHARLES NAVEEN</span>
-            <span style={{ color: 'var(--border-medium)' }}>/</span>
-            <span className="meta-role">FREELANCE WEB DEVELOPER</span>
-            <span style={{ color: 'var(--border-medium)' }}>/</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              TAMIL NADU, INDIA
-            </span>
+            <span className="hero-meta-name">CHARLES NAVEEN</span>
+            <span className="meta-sep" aria-hidden="true">/</span>
+            <span className="hero-meta-role">Creative Web Developer</span>
+            <span className="meta-sep" aria-hidden="true">/</span>
+            <span className="hero-meta-loc">Tamil Nadu, India</span>
           </div>
 
-          <div className="hero-availability-signal" role="status">
-            <span className="ping-dot" aria-hidden="true"></span>
-            <span>AVAILABLE FOR SELECT PROJECTS & AGENCIES</span>
+          <div className="hero-availability-badge" role="status">
+            <span className="pulse-dot" aria-hidden="true"></span>
+            <span>AVAILABLE FOR Q1/Q2 PROJECTS</span>
           </div>
         </div>
 
-        {/* Monumental Headline Composition */}
-        <div className="hero-headline-wrapper">
-          <h1 className="hero-monument-headline">
-            I turn business ideas into{' '}
-            <span className="highlight-serif">digital experiences</span>.
-          </h1>
-        </div>
-
-        {/* Narrative & Strategic Pillars Grid */}
-        <div className="hero-narrative-grid">
-          <div>
-            <p className="hero-narrative-copy">
-              I design and engineer modern, performance-focused websites that help ambitious
-              brands, founders, and digital marketing agencies make an undeniable impression online.
-              Thoughtful design, responsive development, and reliable delivery.
-            </p>
-
-            <div className="hero-actions-cluster">
-              <button
-                ref={magneticPrimaryRef}
-                type="button"
-                className="btn-magnetic-primary"
-                onClick={() => onOpenContact && onOpenContact('direct')}
-              >
-                <span>START A PROJECT</span>
-                <ArrowUpRight size={16} aria-hidden="true" />
-              </button>
-
-              <a
-                ref={magneticSecondaryRef}
-                href="#work"
-                className="btn-magnetic-secondary"
-                onClick={handleScrollToWork}
-              >
-                <span>EXPLORE SELECTED WORK</span>
-                <ArrowDown size={15} aria-hidden="true" />
-              </a>
-
-              <a
-                href="#collaboration"
-                className="kinetic-link"
-                onClick={handleScrollToAgency}
-                style={{ marginLeft: '0.5rem' }}
-              >
-                <span>FOR AGENCIES ↗</span>
-              </a>
+        {/* Oversized Headline Stage with Circular DEV Badge & Editorial Visual */}
+        <div className="hero-monument-stage">
+          <div className="hero-typography-block">
+            <div className="hero-line-row">
+              <h1 className="hero-giant-heading">
+                CHARLES
+              </h1>
+              {/* Circular Interactive DEV Badge (Demo.mp4 Style) */}
+              <div ref={badgeRef} className="circular-dev-badge" aria-hidden="true">
+                <svg className="badge-rotating-text" viewBox="0 0 100 100">
+                  <path
+                    id="circlePath"
+                    d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+                    fill="none"
+                  />
+                  <text>
+                    <textPath href="#circlePath" startOffset="0%">
+                      ★ CREATIVE DEVELOPER ★ WEB CRAFT
+                    </textPath>
+                  </text>
+                </svg>
+                <div className="badge-center-core">
+                  <span>DEV</span>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Quick Studio Pillars Card */}
-          <aside className="hero-pillars-card" aria-label="Development Focus">
-            <div className="pillars-card-title">ENGINEERING CAPABILITIES</div>
-            <ul className="pillars-specs-list">
-              <li className="pillar-spec-item">
-                <span className="pillar-spec-label">CLIENTELE</span>
-                <span className="pillar-spec-value">Direct Businesses & Digital Agencies</span>
-              </li>
-              <li className="pillar-spec-item">
-                <span className="pillar-spec-label">CORE STACK</span>
-                <span className="pillar-spec-value">React, Modern CSS, Semantic HTML5</span>
-              </li>
-              <li className="pillar-spec-item">
-                <span className="pillar-spec-label">CRAFT VALUES</span>
-                <span className="pillar-spec-value">Speed, Clean Typography, Zero Bloat</span>
-              </li>
-              <li className="pillar-spec-item" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-                <span className="pillar-spec-label">LOCATION</span>
-                <span className="pillar-spec-value">Tamil Nadu, India · Global Remote</span>
-              </li>
-            </ul>
-          </aside>
-        </div>
-
-        {/* Hero Cinematic Showcase Stage: Live Build Preview */}
-        <div className="hero-showcase-stage" aria-label="Featured Production Website Preview">
-          <div className="stage-top-bar">
-            <div className="stage-window-controls" aria-hidden="true">
-              <span className="win-dot"></span>
-              <span className="win-dot"></span>
-              <span className="win-dot"></span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-              <span className="project-badge status-completed">
-                <span className="badge-dot" aria-hidden="true"></span>
-                <span>VERIFIED BUILD</span>
+            <div className="hero-line-row second-row">
+              <h1 className="hero-giant-heading">
+                NAVEEN
+              </h1>
+              <span className="hero-heading-tagline">
+                [WEB ARCHITECT &amp; DIGITAL CRAFTSMAN]
               </span>
-              <span className="desktop-only-meta" style={{ color: 'var(--text-muted)' }}>https://bexleylifescience.com</span>
             </div>
-            <span style={{ color: 'var(--accent-primary)', fontWeight: 600, flexShrink: 0 }}>01 / 05</span>
           </div>
 
-          <a
-            href={featuredProject.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="stage-image-link"
-            aria-label={`Open live production site for ${featuredProject.title}`}
-          >
-            <img
-              src={featuredProject.image}
-              alt={featuredProject.imageAlt}
-              className="stage-preview-img"
-              loading="eager"
-              fetchPriority="high"
-              width="1440"
-              height="900"
-            />
-
-            <div className="stage-floating-overlay">
-              <div className="stage-case-meta">
-                <span className="stage-case-category">{featuredProject.category}</span>
-                <span className="stage-case-title">{featuredProject.title}</span>
+          {/* Right Visual Card Showcase (Editorial Frame) */}
+          <div className="hero-visual-card-wrap">
+            <div className="hero-visual-card">
+              <div className="visual-card-image-box">
+                <img
+                  src={featuredProject.image}
+                  alt={featuredProject.imageAlt}
+                  className="visual-card-img"
+                  loading="eager"
+                  fetchPriority="high"
+                  width="720"
+                  height="450"
+                />
+                <div className="visual-card-overlay">
+                  <div className="visual-card-pill">
+                    <span className="visual-pill-dot" aria-hidden="true"></span>
+                    <span>LATEST PRODUCTION BUILD</span>
+                  </div>
+                  <span className="visual-project-title">{featuredProject.title}</span>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <span className="kinetic-link">
-                  <span>VISIT LIVE WEBSITE</span>
-                  <ExternalLink size={14} aria-hidden="true" />
-                </span>
+              <div className="visual-card-caption">
+                <div className="caption-text">
+                  <span className="caption-client">Bexley LifeScience · Live Build</span>
+                  <span className="caption-scope">Custom React · Corporate Distribution</span>
+                </div>
+                <a
+                  href={featuredProject.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="visual-link-icon"
+                  aria-label="Visit Bexley LifeScience live website"
+                >
+                  <ExternalLink size={14} />
+                </a>
               </div>
             </div>
-          </a>
+          </div>
+        </div>
+
+        {/* Narrative & Action Cluster */}
+        <div className="hero-lower-grid">
+          <div className="hero-narrative-box">
+            <p className="hero-lead-text">
+              I build high-performance business websites, digital experiences, and AI-powered solutions.
+              Combining sharp visual art direction, responsive React engineering, and dependable execution
+              for ambitious businesses and agency partners.
+            </p>
+          </div>
+
+          <div className="hero-cta-cluster">
+            <button
+              ref={magneticPrimaryRef}
+              type="button"
+              className="btn-hero-primary"
+              onClick={() => onOpenContact && onOpenContact('direct')}
+            >
+              <span>DISCUSS A PROJECT</span>
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </button>
+
+            <a
+              ref={magneticSecondaryRef}
+              href="#work"
+              className="btn-hero-secondary"
+              onClick={handleScrollToWork}
+            >
+              <span>EXPLORE SELECTED WORK</span>
+              <ArrowDown size={15} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+
+        {/* At-a-glance Strip */}
+        <div className="hero-fact-strip" aria-label="At a glance details">
+          <div className="fact-item">
+            <span className="fact-number">01</span>
+            <div className="fact-info">
+              <span className="fact-label">CORE STACK</span>
+              <span className="fact-value">React · Vite · Modern CSS</span>
+            </div>
+          </div>
+
+          <div className="fact-item">
+            <span className="fact-number">02</span>
+            <div className="fact-info">
+              <span className="fact-label">PRIMARY FOCUS</span>
+              <span className="fact-value">Business Sites &amp; Agency Partnerships</span>
+            </div>
+          </div>
+
+          <div className="fact-item">
+            <span className="fact-number">03</span>
+            <div className="fact-info">
+              <span className="fact-label">LOCATION</span>
+              <span className="fact-value">Tamil Nadu, India · Global Remote</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUp } from 'lucide-react';
+import { contactConfig } from '../data/contactConfig';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -10,7 +11,8 @@ export default function Footer() {
 
   const navLinks = [
     { label: 'Work', href: '#work' },
-    { label: 'Services', href: '#services' },
+    { label: 'Capabilities', href: '#services' },
+    { label: 'Impact', href: '#impact' },
     { label: 'Agencies', href: '#collaboration' },
     { label: 'Process', href: '#process' },
     { label: 'About', href: '#about' },
@@ -18,24 +20,32 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="footer-wrap" role="contentinfo">
+    <footer className="master-footer" role="contentinfo">
       <div className="container">
-        <div className="footer-top-grid">
-          <div>
-            <div className="footer-brand-title">
+        <div className="footer-top-row">
+          <div className="footer-identity-col">
+            <div className="footer-monument-brand">
               <span>CHARLES NAVEEN</span>
-              <span className="brand-dot" aria-hidden="true"></span>
+              <span className="brand-dot-lime" aria-hidden="true"></span>
             </div>
-            <p className="footer-substatement">
-              Freelance Web Developer · Engineering high-performance websites and dependable agency partnerships.
+            <p className="footer-mission-statement">
+              Creative Web Developer crafting high-performance business websites, digital experiences, and reliable agency partnerships.
             </p>
+            <div className="footer-contact-fast">
+              <a href={`mailto:${contactConfig.emailPlaceholder}`} className="footer-fast-link">
+                {contactConfig.emailPlaceholder}
+              </a>
+              <span className="footer-sep">·</span>
+              <span className="footer-loc-text">{contactConfig.location}</span>
+            </div>
           </div>
 
-          <nav aria-label="Footer Quick Links">
+          <nav aria-label="Footer Navigation" className="footer-nav-col">
+            <span className="footer-col-title">NAVIGATION</span>
             <ul className="footer-links-list">
               {navLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="footer-link-anchor">
+                  <a href={link.href} className="footer-nav-anchor">
                     {link.label}
                   </a>
                 </li>
@@ -44,16 +54,18 @@ export default function Footer() {
           </nav>
         </div>
 
-        <div className="footer-bottom-bar">
-          <p>© {currentYear} Charles Naveen. Designed and developed with care.</p>
-          
+        <div className="footer-bottom-row">
+          <p className="footer-legal-copy">
+            © {currentYear} Charles Naveen. Engineered with custom React &amp; modern CSS.
+          </p>
+
           <button
             type="button"
-            className="top-return-btn"
+            className="footer-top-btn"
             onClick={handleScrollToTop}
             aria-label="Scroll back to top of page"
           >
-            <span>Back to top</span>
+            <span>BACK TO TOP</span>
             <ArrowUp size={13} aria-hidden="true" />
           </button>
         </div>

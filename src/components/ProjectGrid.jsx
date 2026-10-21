@@ -1,114 +1,192 @@
-import React from 'react';
-import { ArrowUpRight, ExternalLink } from 'lucide-react';
-import { demoProjects } from '../data/projects';
+import React, { useState } from 'react';
+import { ArrowUpRight, ExternalLink, FileText, Sparkles } from 'lucide-react';
+import { featuredProject, demoProjects } from '../data/projects';
+import { useMagnetic } from '../hooks/useMagnetic';
 
 export default function ProjectGrid({ onSelectProject }) {
+  const [filter, setFilter] = useState('all');
+
+  const allProjects = [
+    {
+      ...featuredProject,
+      theme: 'theme-obsidian',
+      accentColor: '#D8F33A',
+      cardType: 'flagship'
+    },
+    {
+      ...demoProjects[0], // D-wings
+      theme: 'theme-lime',
+      accentColor: '#11120D',
+      cardType: 'editorial'
+    },
+    {
+      ...demoProjects[1], // Evara
+      theme: 'theme-ivory',
+      accentColor: '#11120D',
+      cardType: 'editorial'
+    },
+    {
+      ...demoProjects[2], // LARA
+      theme: 'theme-yellow',
+      accentColor: '#11120D',
+      cardType: 'editorial'
+    },
+    {
+      ...demoProjects[3], // Jeeva Jee
+      theme: 'theme-charcoal',
+      accentColor: '#D8F33A',
+      cardType: 'editorial'
+    }
+  ];
+
+  const filteredProjects = filter === 'all'
+    ? allProjects
+    : filter === 'client'
+      ? allProjects.filter((p) => p.status.includes('CLIENT'))
+      : allProjects.filter((p) => !p.status.includes('CLIENT'));
+
   return (
-    <section className="projects-section" aria-label="Demonstration Concepts and Prototypes">
+    <section id="work" className="selected-work-section" aria-label="Selected Projects and Client Work">
       <div className="container">
-        <div className="section-header-wrap">
-          <div className="section-pretitle">
-            <span className="studio-tag">EXPLORATORY WORK</span>
-            <span style={{ color: 'var(--border-medium)' }}>/</span>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              FOUR CONCEPTS
-            </span>
+        {/* Section Header */}
+        <div className="work-header-row">
+          <div>
+            <div className="section-pretitle">
+              <span className="studio-tag">PORTFOLIO</span>
+              <span style={{ color: 'var(--border-medium)' }}>/</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                VERIFIED BUILDS &amp; CONCEPTS
+              </span>
+            </div>
+            <h2 className="work-monument-title">
+              SELECTED WORK
+            </h2>
           </div>
-          <h2 className="section-title-large">
-            Demonstration Series & <span className="highlight-serif">Prototypes</span>
-          </h2>
-          <p className="section-lead">
-            Curated web prototypes exploring diverse industries, brand aesthetics, and practical conversion
-            pathways. Transparently categorized as non-client concept builds.
-          </p>
+
+          {/* Filter Pills */}
+          <div className="work-filter-pills" role="tablist" aria-label="Filter Projects">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'all'}
+              className={`filter-pill ${filter === 'all' ? 'is-active' : ''}`}
+              onClick={() => setFilter('all')}
+            >
+              All Projects ({allProjects.length})
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'client'}
+              className={`filter-pill ${filter === 'client' ? 'is-active' : ''}`}
+              onClick={() => setFilter('client')}
+            >
+              Client Builds (1)
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={filter === 'demo'}
+              className={`filter-pill ${filter === 'demo' ? 'is-active' : ''}`}
+              onClick={() => setFilter('demo')}
+            >
+              Demonstration Series (4)
+            </button>
+          </div>
         </div>
 
-        <div className="concept-editorial-grid">
-          {demoProjects.map((project) => (
-            <article key={project.id} className="concept-card">
-              {/* Visual Container */}
-              <div className="concept-visual-wrap">
-                <div className="concept-badges-bar">
-                  <span className={`project-badge ${project.badgeClass}`}>
-                    <span className="badge-dot" aria-hidden="true"></span>
+        {/* Color-Blocked Editorial Project Cards (Demo.mp4 Style) */}
+        <div className="work-panels-grid">
+          {filteredProjects.map((project, idx) => (
+            <article
+              key={project.id}
+              className={`work-panel-card ${project.theme} ${project.cardType === 'flagship' ? 'is-flagship-card' : ''}`}
+            >
+              {/* Card Header Bar */}
+              <div className="panel-header-bar">
+                <div className="panel-meta-left">
+                  <span className="panel-badge-status">
+                    <span className="panel-badge-dot" aria-hidden="true"></span>
                     <span>{project.status}</span>
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: '#FFFFFF', backgroundColor: 'rgba(0,0,0,0.6)', padding: '0.2rem 0.5rem', borderRadius: '2px' }}>
-                    /{project.number}
-                  </span>
+                  <span className="panel-category-label">{project.category}</span>
                 </div>
-
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open live demo for ${project.title} in a new tab`}
-                  style={{ display: 'block' }}
-                >
-                  <img
-                    src={project.image}
-                    alt={project.imageAlt}
-                    className="concept-image"
-                    loading="lazy"
-                    decoding="async"
-                    width="1440"
-                    height="900"
-                  />
-                </a>
+                <span className="panel-index-num">/{project.number}</span>
               </div>
 
-              {/* Card Body */}
-              <div className="concept-body">
-                <div className="concept-meta-row">
-                  <span className="concept-category-tag">{project.category}</span>
-                  <span className="concept-index-num">PROJECT {project.number}</span>
+              {/* Card Body: Split or Stacked */}
+              <div className="panel-inner-body">
+                <div className="panel-content-col">
+                  <h3 className="panel-project-title">{project.title}</h3>
+                  <p className="panel-tagline">{project.tagline}</p>
+                  <p className="panel-desc">{project.description}</p>
+
+                  {/* Highlights / Deliverables */}
+                  <div className="panel-focus-box">
+                    <div className="panel-focus-title">FOCUS &amp; ARCHITECTURE:</div>
+                    <ul className="panel-focus-list">
+                      {(project.technicalHighlights || project.focusAreas || []).slice(0, 3).map((item, fIdx) => (
+                        <li key={fIdx} className="panel-focus-item">
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Dotted Separator Line (Demo.mp4 Style) */}
+                  <div className="panel-dotted-line" aria-hidden="true"></div>
+
+                  {/* Actions Row */}
+                  <div className="panel-actions-row">
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="panel-btn-live"
+                      aria-label={`Open live link for ${project.title}`}
+                    >
+                      <span>VIEW LIVE SITE</span>
+                      <ArrowUpRight size={15} aria-hidden="true" />
+                    </a>
+
+                    {onSelectProject && (
+                      <button
+                        type="button"
+                        className="panel-btn-spec"
+                        onClick={() => onSelectProject(project)}
+                      >
+                        <FileText size={14} aria-hidden="true" />
+                        <span>SPEC DETAILS</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <h3 className="concept-card-title">{project.title}</h3>
-                <p className="concept-card-desc">{project.description}</p>
-
-                {/* Focus Areas Box */}
-                <div className="concept-focus-box">
-                  <ul className="concept-focus-list">
-                    {project.focusAreas.map((point, idx) => (
-                      <li key={idx} className="concept-focus-item">
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Card Footer Actions */}
-                <div className="concept-card-footer">
+                {/* Visual Preview Frame */}
+                <div className="panel-visual-col">
                   <a
                     href={project.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="kinetic-link"
+                    className="panel-image-anchor"
+                    tabIndex={-1}
+                    aria-hidden="true"
                   >
-                    <span>{project.ctaText}</span>
-                    <ArrowUpRight size={14} aria-hidden="true" />
+                    <div className="panel-image-frame">
+                      <img
+                        src={project.image}
+                        alt={project.imageAlt}
+                        className="panel-project-img"
+                        loading="eager"
+                        decoding="async"
+                        width="1200"
+                        height="750"
+                      />
+                      <div className="panel-image-hover-indicator">
+                        <span>OPEN LIVE DEMO ↗</span>
+                      </div>
+                    </div>
                   </a>
-
-                  {onSelectProject && (
-                    <button
-                      type="button"
-                      onClick={() => onSelectProject(project)}
-                      style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 'var(--text-xs)',
-                        color: 'var(--text-muted)',
-                        cursor: 'pointer',
-                        padding: '0.35rem 0',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em'
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
-                    >
-                      SPEC DETAILS
-                    </button>
-                  )}
                 </div>
               </div>
             </article>

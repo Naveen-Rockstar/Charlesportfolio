@@ -18,11 +18,10 @@ export default function FeaturedProject({ onSelectProject }) {
             </span>
           </div>
           <h2 className="section-title-large">
-            Verified Live <span className="highlight-serif">Production Build</span>
+            Featured <span className="highlight-serif">Client Work</span>
           </h2>
           <p className="section-lead">
-            A production website commissioned, developed, and deployed for an active pharmaceutical
-            distribution enterprise across Tamil Nadu.
+            A corporate website for an active pharmaceutical distribution enterprise — designed, developed, and deployed across Tamil Nadu.
           </p>
         </div>
 
