@@ -1,10 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowUpRight, ArrowRight, Mail, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { contactConfig } from '../data/contactConfig';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Contact({ defaultIntent = 'direct' }) {
+  const rootRef = useRef(null);
   const [intent, setIntent] = useState(defaultIntent);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Banner headline reveal (WRITE ME ->)
+      gsap.from('.contact-banner-head', {
+        scrollTrigger: {
+          trigger: '.contact-banner-head',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out'
+      });
+
+      // Animated arrow slide
+      gsap.from('.contact-arrow-huge', {
+        scrollTrigger: {
+          trigger: '.contact-huge-title-row',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        x: -40,
+        opacity: 0,
+        duration: 1,
+        ease: 'back.out(1.7)'
+      });
+
+      // Split layout: Channels & Form entrance
+      gsap.from('.contact-info-card', {
+        scrollTrigger: {
+          trigger: '.contact-layout-grid',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.75,
+        ease: 'power2.out'
+      });
+
+      gsap.from('.contact-form-container', {
+        scrollTrigger: {
+          trigger: '.contact-layout-grid',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 45,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -116,7 +177,7 @@ export default function Contact({ defaultIntent = 'direct' }) {
   };
 
   return (
-    <section id="contact" className="contact-dark-section" aria-label="Contact Charles Naveen">
+    <section id="contact" ref={rootRef} className="contact-dark-section" aria-label="Contact Charles Naveen">
       <div className="container">
         {/* Massive Headline Banner (Demo.mp4 Style: WRITE ME ->) */}
         <div className="contact-banner-head">

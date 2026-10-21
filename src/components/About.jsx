@@ -1,10 +1,62 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { developerBio } from '../data/projects';
 import { Award, GraduationCap, MapPin, Compass } from 'lucide-react';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function About() {
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header reveal
+      gsap.from('.about-editorial-section .section-header-wrap', {
+        scrollTrigger: {
+          trigger: '.about-editorial-section .section-header-wrap',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+
+      // Left narrative text stagger
+      gsap.from('.about-narrative-flow > *', {
+        scrollTrigger: {
+          trigger: '.about-narrative-flow',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 30,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.7,
+        ease: 'power2.out'
+      });
+
+      // Right values list stagger
+      gsap.from('.pillar-item', {
+        scrollTrigger: {
+          trigger: '.pillars-stack',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        x: 35,
+        opacity: 0,
+        stagger: 0.14,
+        duration: 0.75,
+        ease: 'power3.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="about" className="about-editorial-section" aria-label="About Charles Naveen">
+    <section id="about" ref={rootRef} className="about-editorial-section" aria-label="About Charles Naveen">
       <div className="container">
         {/* Section Header */}
         <div className="section-header-wrap">

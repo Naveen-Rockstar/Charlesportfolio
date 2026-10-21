@@ -1,12 +1,49 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Statement({ onOpenContact }) {
+  const rootRef = useRef(null);
   const magneticBtnRef = useMagnetic(0.2);
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Animate the big statement lines with scrollTrigger
+      gsap.from('.statement-line', {
+        scrollTrigger: {
+          trigger: '.statement-typography-wall',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 60,
+        opacity: 0,
+        stagger: 0.14,
+        duration: 0.8,
+        ease: 'power3.out'
+      });
+
+      // Animate the narrative and CTA
+      gsap.from('.statement-footer-row', {
+        scrollTrigger: {
+          trigger: '.statement-footer-row',
+          start: 'top 88%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="statement-band-section" aria-label="Philosophy and Craft">
+    <section ref={rootRef} className="statement-band-section" aria-label="Philosophy and Craft">
       <div className="container">
         <div className="statement-inner-wrap">
           <div className="statement-meta-tag">

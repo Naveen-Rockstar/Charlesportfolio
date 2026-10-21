@@ -1,9 +1,60 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { workingProcess } from '../data/projects';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Process() {
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header reveal
+      gsap.from('.process-workflow-section .section-header-wrap', {
+        scrollTrigger: {
+          trigger: '.process-workflow-section .section-header-wrap',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+
+      // Stepper horizontal line expand
+      gsap.from('.stepper-horizontal-line', {
+        scrollTrigger: {
+          trigger: '.process-stepper-track',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        scaleX: 0,
+        transformOrigin: 'left center',
+        duration: 1.2,
+        ease: 'power3.inOut'
+      });
+
+      // Circular step badges and descriptions sequential reveal
+      gsap.from('.process-step-node', {
+        scrollTrigger: {
+          trigger: '.process-stepper-track',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 45,
+        opacity: 0,
+        stagger: 0.18,
+        duration: 0.8,
+        ease: 'back.out(1.4)'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="process" className="process-workflow-section" aria-label="Development Process">
+    <section id="process" ref={rootRef} className="process-workflow-section" aria-label="Development Process">
       <div className="container">
         {/* Section Header */}
         <div className="section-header-wrap">

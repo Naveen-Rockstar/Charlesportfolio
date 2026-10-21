@@ -1,12 +1,84 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, ArrowDown, ExternalLink, Code2, Sparkles } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, ExternalLink } from 'lucide-react';
 import { featuredProject } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Hero({ onOpenContact, onSelectProject }) {
+  const rootRef = useRef(null);
   const magneticPrimaryRef = useMagnetic(0.25);
   const magneticSecondaryRef = useMagnetic(0.2);
   const badgeRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // Meta bar entrance
+      tl.from('.hero-meta-bar', {
+        y: -20,
+        opacity: 0,
+        duration: 0.6
+      });
+
+      // Split monumental title reveal
+      tl.from('.hero-giant-heading', {
+        y: 60,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.85
+      }, '-=0.3');
+
+      // DEV Circular badge pop in
+      tl.from('.circular-dev-badge', {
+        scale: 0,
+        rotation: -180,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'back.out(1.8)'
+      }, '-=0.6');
+
+      // Tagline reveal
+      tl.from('.hero-heading-tagline', {
+        x: -25,
+        opacity: 0,
+        duration: 0.5
+      }, '-=0.5');
+
+      // Right visual card reveal
+      tl.from('.hero-visual-card', {
+        y: 40,
+        scale: 0.94,
+        opacity: 0,
+        duration: 0.85,
+        ease: 'power2.out'
+      }, '-=0.6');
+
+      // Narrative text & CTAs
+      tl.fromTo('.hero-lead-text', 
+        { y: 25, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7 },
+        '-=0.5'
+      );
+
+      tl.fromTo('.hero-cta-cluster > *',
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.1, duration: 0.6 },
+        '-=0.4'
+      );
+
+      // Fact items stagger
+      tl.fromTo('.fact-item',
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.08, duration: 0.5 },
+        '-=0.3'
+      );
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleScrollToWork = (e) => {
     e.preventDefault();
@@ -15,7 +87,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
   };
 
   return (
-    <section className="hero-editorial-section" aria-label="Charles Naveen — Portfolio Hero">
+    <section ref={rootRef} className="hero-editorial-section" aria-label="Charles Naveen — Portfolio Hero">
       <div className="container">
         {/* Top Metadata Bar */}
         <div className="hero-meta-bar">

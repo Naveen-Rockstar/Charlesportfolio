@@ -1,9 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { services } from '../data/projects';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Services({ onSelectServiceForContact }) {
   const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header reveal
+      gsap.from('.services-section .section-header-wrap', {
+        scrollTrigger: {
+          trigger: '.services-section .section-header-wrap',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+
+      // Staggered capability rows reveal
+      gsap.from('.capability-row', {
+        scrollTrigger: {
+          trigger: '.capabilities-container',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.75,
+        ease: 'power3.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const capabilities = [
     {
@@ -49,7 +86,7 @@ export default function Services({ onSelectServiceForContact }) {
   ];
 
   return (
-    <section id="services" className="services-section" aria-label="Capabilities and Services">
+    <section id="services" ref={rootRef} className="services-section" aria-label="Capabilities and Services">
       <div className="container">
         {/* Section Header */}
         <div className="section-header-wrap">

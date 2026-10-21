@@ -1,10 +1,73 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ArrowUpRight, Check, ShieldCheck, Clock, Layers, Sparkles } from 'lucide-react';
 import { agencyCollaboration } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Collaboration({ onOpenContact }) {
+  const rootRef = useRef(null);
   const magneticAgencyBtnRef = useMagnetic(0.2);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header reveal
+      gsap.from('.agency-collaboration-section .section-header-wrap', {
+        scrollTrigger: {
+          trigger: '.agency-collaboration-section .section-header-wrap',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+
+      // Bento cards staggered entrance
+      gsap.from('.agency-bento-card', {
+        scrollTrigger: {
+          trigger: '.agency-bento-grid',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.75,
+        ease: 'power3.out'
+      });
+
+      // Agency values banner
+      gsap.from('.agency-values-banner', {
+        scrollTrigger: {
+          trigger: '.agency-values-banner',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.75,
+        ease: 'power2.out'
+      });
+
+      // Agency action row
+      gsap.from('.agency-action-row', {
+        scrollTrigger: {
+          trigger: '.agency-action-row',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 25,
+        opacity: 0,
+        duration: 0.65,
+        ease: 'power2.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleCtaClick = (e) => {
     e.preventDefault();
@@ -19,7 +82,7 @@ export default function Collaboration({ onOpenContact }) {
   };
 
   return (
-    <section id="collaboration" className="agency-collaboration-section" aria-label="Digital Marketing Agency Partnerships">
+    <section id="collaboration" ref={rootRef} className="agency-collaboration-section" aria-label="Digital Marketing Agency Partnerships">
       <div className="container">
         {/* Section Header */}
         <div className="section-header-wrap" style={{ maxWidth: '920px' }}>

@@ -1,8 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Check, X, Zap, Shield, Smartphone } from 'lucide-react';
+import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function ImpactComparison() {
   const [activeTab, setActiveTab] = useState('performance');
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header and numbers bar reveal
+      gsap.from('.impact-header-row', {
+        scrollTrigger: {
+          trigger: '.impact-header-row',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.65,
+        ease: 'power3.out'
+      });
+
+      gsap.from('.impact-numbers-bar', {
+        scrollTrigger: {
+          trigger: '.impact-numbers-bar',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        scale: 0.96,
+        y: 35,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out'
+      });
+
+      // Split cards entrance
+      gsap.from('.impact-split-grid > *', {
+        scrollTrigger: {
+          trigger: '.impact-split-grid',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 40,
+        opacity: 0,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: 'power3.out'
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const comparisons = {
     performance: {
@@ -70,7 +120,7 @@ export default function ImpactComparison() {
   const current = comparisons[activeTab];
 
   return (
-    <section className="impact-section" aria-label="Before and After Performance Impact">
+    <section ref={rootRef} className="impact-section" aria-label="Before and After Performance Impact">
       <div className="container">
         {/* Section Heading */}
         <div className="impact-header-row">

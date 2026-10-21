@@ -1,10 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowUpRight, ExternalLink, FileText, Sparkles } from 'lucide-react';
 import { featuredProject, demoProjects } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
+import { gsap, ScrollTrigger, prefersReducedMotion } from '../utils/motion';
 
 export default function ProjectGrid({ onSelectProject }) {
   const [filter, setFilter] = useState('all');
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      // Header reveal
+      gsap.from('.work-header-row', {
+        scrollTrigger: {
+          trigger: '.work-header-row',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 35,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power3.out'
+      });
+
+      // Individual project card reveals
+      const cards = gsap.utils.toArray('.work-panel-card');
+      cards.forEach((card) => {
+        const img = card.querySelector('.panel-project-img');
+        const content = card.querySelector('.panel-content-col');
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
+        });
+
+        tl.from(card, {
+          y: 60,
+          opacity: 0,
+          duration: 0.85,
+          ease: 'power3.out'
+        });
+
+        if (img) {
+          tl.from(img, {
+            scale: 1.15,
+            duration: 1.2,
+            ease: 'power2.out'
+          }, '-=0.6');
+        }
+
+        if (content) {
+          tl.from(content.children, {
+            y: 20,
+            opacity: 0,
+            stagger: 0.08,
+            duration: 0.6,
+            ease: 'power2.out'
+          }, '-=0.8');
+        }
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
+  }, [filter]); // Re-run when filter changes so new cards animate nicely
 
   const allProjects = [
     {
@@ -46,7 +109,7 @@ export default function ProjectGrid({ onSelectProject }) {
       : allProjects.filter((p) => !p.status.includes('CLIENT'));
 
   return (
-    <section id="work" className="selected-work-section" aria-label="Selected Projects and Client Work">
+    <section id="work" ref={rootRef} className="selected-work-section" aria-label="Selected Projects and Client Work">
       <div className="container">
         {/* Section Header */}
         <div className="work-header-row">
