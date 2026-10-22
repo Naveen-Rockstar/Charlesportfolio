@@ -3,11 +3,10 @@ import { ArrowUpRight, Menu, X, ArrowRight, Download } from 'lucide-react';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { contactConfig } from '../data/contactConfig';
 
-export default function Navbar({ onOpenContact }) {
+export default function Navbar({ currentRoute = '/', onNavigate, onOpenContact }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const magneticCtaRef = useMagnetic(0.25);
-  const magneticPdfRef = useMagnetic(0.2);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,21 +40,19 @@ export default function Navbar({ onOpenContact }) {
   }, [mobileMenuOpen]);
 
   const navLinks = [
-    { label: 'Work', href: '#work', number: '01' },
-    { label: 'Services', href: '#services', number: '02' },
-    { label: 'Standards', href: '#impact', number: '03' },
-    { label: 'Start a Project', href: '#start-project', number: '04' },
-    { label: 'Agencies', href: '#collaboration', number: '05' },
-    { label: 'Process', href: '#process', number: '06' },
-    { label: 'About', href: '#about', number: '07' },
+    { label: 'Home', href: '/', number: '01' },
+    { label: 'Work', href: '/work', number: '02' },
+    { label: 'Services', href: '/services', number: '03' },
+    { label: 'Contact', href: '/contact', number: '04' },
   ];
 
   const handleLinkClick = (e, href) => {
     e.preventDefault();
     setMobileMenuOpen(false);
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigate) {
+      onNavigate(href);
+    } else {
+      window.location.pathname = href;
     }
   };
 
@@ -64,6 +61,8 @@ export default function Navbar({ onOpenContact }) {
     setMobileMenuOpen(false);
     if (onOpenContact) {
       onOpenContact('direct');
+    } else if (onNavigate) {
+      onNavigate('/contact');
     } else {
       const contactSection = document.querySelector('#contact');
       if (contactSection) {
@@ -77,57 +76,42 @@ export default function Navbar({ onOpenContact }) {
       <header className={`navbar ${scrolled ? 'is-scrolled' : ''}`} role="banner">
         <div className="container navbar-inner">
           {/* Brand Link */}
-          <a href="#" className="brand-link" aria-label="Charles Naveen — Freelance Web Developer Homepage">
+          <a
+            href="/"
+            className="brand-link"
+            aria-label="Charles Naveen — Freelance Web Developer Homepage"
+            onClick={(e) => handleLinkClick(e, '/')}
+          >
             <span className="brand-name">CHARLES NAVEEN</span>
             <span className="brand-lime-dot" aria-hidden="true"></span>
           </a>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links — 4 Primary Pages */}
           <nav className="nav-desktop" aria-label="Primary Navigation">
             <ul className="nav-links-desktop">
-              {navLinks.map((item) => (
-                <li key={item.label}>
-                  <a
-                    href={item.href}
-                    className="nav-item-link"
-                    onClick={(e) => handleLinkClick(e, item.href)}
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
+              {navLinks.map((item) => {
+                const isActive = currentRoute === item.href || (item.href !== '/' && currentRoute.startsWith(item.href));
+                return (
+                  <li key={item.label}>
+                    <a
+                      href={item.href}
+                      className={`nav-item-link ${isActive ? 'is-active' : ''}`}
+                      onClick={(e) => handleLinkClick(e, item.href)}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
           {/* Right Header Cluster */}
           <div className="nav-right-cluster">
-            <div className="nav-status-indicator" role="status">
-              <span className="nav-pulse-dot" aria-hidden="true"></span>
-              <span className="nav-status-text">Available</span>
-            </div>
-
-            <a
-              ref={magneticPdfRef}
-              href="/charles-naveen-portfolio.pdf"
-              download="Charles-Naveen-Portfolio.pdf"
-              className="nav-item-link nav-pdf-link"
-              title="Download 3-page compact portfolio PDF"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '0.4rem 0.75rem',
-                fontSize: 'var(--text-xs)',
-                fontFamily: 'var(--font-mono)'
-              }}
-            >
-              <Download size={13} aria-hidden="true" />
-              <span>PDF</span>
-            </a>
-
             <a
               ref={magneticCtaRef}
-              href="#contact"
+              href="/contact"
               className="nav-cta-pill"
               onClick={handleTalkClick}
               aria-label="Write Me — Contact Charles Naveen"
@@ -184,24 +168,13 @@ export default function Navbar({ onOpenContact }) {
                     </a>
                   </li>
                 ))}
-                <li className="overlay-link-item">
-                  <a
-                    href="/charles-naveen-portfolio.pdf"
-                    download="Charles-Naveen-Portfolio.pdf"
-                    className="overlay-anchor"
-                  >
-                    <span className="overlay-link-num">08</span>
-                    <span className="overlay-link-text">Download Portfolio PDF</span>
-                    <Download size={22} className="overlay-link-arrow" aria-hidden="true" />
-                  </a>
-                </li>
                 <li className="overlay-link-item contact-item">
                   <a
-                    href="#contact"
+                    href="/contact"
                     onClick={handleTalkClick}
                     className="overlay-anchor highlight"
                   >
-                    <span className="overlay-link-num">09</span>
+                    <span className="overlay-link-num">05</span>
                     <span className="overlay-link-text">WRITE ME</span>
                     <ArrowUpRight size={24} className="overlay-link-arrow" aria-hidden="true" />
                   </a>
@@ -210,6 +183,17 @@ export default function Navbar({ onOpenContact }) {
             </nav>
 
             <div className="overlay-meta-column">
+              <div className="overlay-meta-group">
+                <span className="overlay-meta-title">PORTFOLIO DOCUMENT</span>
+                <a
+                  href="/charles-naveen-portfolio.pdf"
+                  download="Charles-Naveen-Portfolio.pdf"
+                  className="overlay-meta-link highlight-lime"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Download Portfolio PDF ↓
+                </a>
+              </div>
               <div className="overlay-meta-group">
                 <span className="overlay-meta-title">DIRECT INQUIRIES</span>
                 <a href={`mailto:${contactConfig.emailPlaceholder}`} className="overlay-meta-link">

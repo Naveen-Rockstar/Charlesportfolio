@@ -69,16 +69,26 @@
   --text-monument: clamp(3.2rem, 2.5rem + 5vw, 7.5rem);
   --text-giant: clamp(3.8rem, 2.8rem + 6.5vw, 9.5rem);
 
-  /* Layout Spacing */
+  /* Layout Spacing — Optimized for Scannable Editorial Flow */
   --container-max: 1380px;
   --container-pad: clamp(1.25rem, 4vw, 3.5rem);
-  --section-pad-y: clamp(4.5rem, 3.5rem + 4.5vw, 8.5rem);
+  --section-pad-y: clamp(2.5rem, 2rem + 2vw, 4.25rem);
+  --section-pad-compact: clamp(1.75rem, 1.5rem + 1.2vw, 3rem);
 
   /* Motion Curves */
   --transition-fast: 160ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-base: 280ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-smooth: 450ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-slow: 700ms cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Navbar Dimensions & Offsets */
+  --navbar-height: 76px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 68px;
+  }
 }
 
 /* ==========================================================================
@@ -93,7 +103,7 @@
 
 html {
   font-size: 16px;
-  scroll-padding-top: 88px;
+  scroll-padding-top: calc(var(--navbar-height) + 16px);
   background-color: var(--bg-ivory);
   color: var(--text-near-black);
   text-rendering: optimizeLegibility;
@@ -109,12 +119,13 @@ body {
   background-color: var(--bg-ivory);
   min-height: 100vh;
   position: relative;
+  padding-top: calc(var(--navbar-height) + env(safe-area-inset-top, 0px));
 }
 
 .portfolio-app-root {
   width: 100%;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Typography Defaults */

@@ -1,14 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, ArrowDown, ExternalLink, Download } from 'lucide-react';
-import { featuredProject } from '../data/projects';
+import { ArrowUpRight, ArrowDown, CheckCircle2 } from 'lucide-react';
+import { services } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { gsap, prefersReducedMotion } from '../utils/motion';
 
-export default function Hero({ onOpenContact, onSelectProject }) {
+export default function Hero({ onOpenContact, onNavigate }) {
   const rootRef = useRef(null);
   const magneticPrimaryRef = useMagnetic(0.25);
   const magneticSecondaryRef = useMagnetic(0.2);
-  const magneticPdfRef = useMagnetic(0.2);
   const badgeRef = useRef(null);
 
   useEffect(() => {
@@ -24,12 +23,12 @@ export default function Hero({ onOpenContact, onSelectProject }) {
         duration: 0.6
       });
 
-      // Split monumental title reveal
+      // Monumental title reveal
       tl.from('.hero-giant-heading', {
-        y: 60,
+        y: 50,
         opacity: 0,
         stagger: 0.12,
-        duration: 0.85
+        duration: 0.8
       }, '-=0.3');
 
       // DEV Circular badge pop in
@@ -43,31 +42,29 @@ export default function Hero({ onOpenContact, onSelectProject }) {
 
       // Tagline reveal
       tl.from('.hero-heading-tagline', {
-        x: -25,
+        x: -20,
         opacity: 0,
         duration: 0.5
       }, '-=0.5');
 
-      // Right visual card reveal
-      tl.from('.hero-visual-card', {
-        y: 40,
-        scale: 0.94,
-        opacity: 0,
-        duration: 0.85,
-        ease: 'power2.out'
-      }, '-=0.6');
-
       // Narrative text & CTAs
-      tl.fromTo('.hero-lead-text', 
-        { y: 25, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7 },
-        '-=0.5'
+      tl.fromTo('.hero-narrative-box',
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6 },
+        '-=0.4'
       );
 
       tl.fromTo('.hero-cta-cluster > *',
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.1, duration: 0.6 },
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.08, duration: 0.5 },
         '-=0.4'
+      );
+
+      // Right preview card entrance
+      tl.fromTo('.hero-preview-card',
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' },
+        '-=0.5'
       );
 
       // Fact items stagger
@@ -81,10 +78,36 @@ export default function Hero({ onOpenContact, onSelectProject }) {
     return () => ctx.revert();
   }, []);
 
-  const handleScrollToWork = (e) => {
+  const handleWorkClick = (e) => {
     e.preventDefault();
-    const el = document.querySelector('#work');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigate) {
+      onNavigate('/work');
+    } else {
+      const el = document.querySelector('#work');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleServicesClick = (e) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate('/services');
+    } else {
+      const el = document.querySelector('#services');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    if (onOpenContact) {
+      onOpenContact('direct');
+    } else if (onNavigate) {
+      onNavigate('/contact');
+    } else {
+      const el = document.querySelector('#contact');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
@@ -106,135 +129,145 @@ export default function Hero({ onOpenContact, onSelectProject }) {
           </div>
         </div>
 
-        {/* Oversized Headline Stage with Circular DEV Badge & Editorial Visual */}
-        <div className="hero-monument-stage">
-          <div className="hero-typography-block">
-            <div className="hero-line-row">
-              <h1 className="hero-giant-heading">
-                CHARLES
-              </h1>
-              {/* Circular Interactive DEV Badge */}
-              <div ref={badgeRef} className="circular-dev-badge" aria-hidden="true">
-                <svg className="badge-rotating-text" viewBox="0 0 100 100">
-                  <path
-                    id="circlePath"
-                    d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
-                    fill="none"
-                  />
-                  <text>
-                    <textPath href="#circlePath" startOffset="0%">
-                      ★ FREELANCE WEB DEV ★ CLEAN REACT
-                    </textPath>
-                  </text>
-                </svg>
-                <div className="badge-center-core">
-                  <span>DEV</span>
+        {/* 2-Column Balanced Hero Stage (Improvement A) */}
+        <div className="hero-split-stage">
+          {/* Left Column: Monumental Typography, Positioning & CTAs */}
+          <div className="hero-left-column">
+            <div className="hero-typography-block">
+              <div className="hero-line-row">
+                <h1 className="hero-giant-heading">
+                  CHARLES
+                </h1>
+                {/* Circular Interactive DEV Badge */}
+                <div ref={badgeRef} className="circular-dev-badge" aria-hidden="true">
+                  <svg className="badge-rotating-text" viewBox="0 0 100 100">
+                    <path
+                      id="circlePath"
+                      d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+                      fill="none"
+                    />
+                    <text>
+                      <textPath href="#circlePath" startOffset="0%">
+                        ★ FREELANCE WEB DEV ★ CLEAN REACT
+                      </textPath>
+                    </text>
+                  </svg>
+                  <div className="badge-center-core">
+                    <span>DEV</span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="hero-line-row second-row">
+                <h1 className="hero-giant-heading">
+                  NAVEEN
+                </h1>
+                <span className="hero-heading-tagline">
+                  [FREELANCE WEB DEVELOPER]
+                </span>
               </div>
             </div>
 
-            <div className="hero-line-row second-row">
-              <h1 className="hero-giant-heading">
-                NAVEEN
-              </h1>
-              <span className="hero-heading-tagline">
-                [FREELANCE WEB DEVELOPER]
-              </span>
+            <div className="hero-narrative-box">
+              <h2 className="hero-value-headline">
+                Websites built to turn business attention into enquiries.
+              </h2>
+              <p className="hero-lead-text">
+                I design and develop modern websites for businesses and creative teams, combining thoughtful design, smooth interactions, and performance-focused development.
+              </p>
+            </div>
+
+            <div className="hero-cta-cluster">
+              <button
+                ref={magneticPrimaryRef}
+                type="button"
+                className="btn-hero-primary"
+                onClick={handleContactClick}
+              >
+                <span>DISCUSS A PROJECT</span>
+                <ArrowUpRight size={16} aria-hidden="true" />
+              </button>
+
+              <a
+                ref={magneticSecondaryRef}
+                href="/work"
+                className="btn-hero-secondary"
+                onClick={handleWorkClick}
+              >
+                <span>EXPLORE WORK</span>
+                <ArrowDown size={15} aria-hidden="true" />
+              </a>
             </div>
           </div>
 
-          {/* Right Visual Card Showcase (Editorial Frame) */}
-          <div className="hero-visual-card-wrap">
-            <div className="hero-visual-card">
-              <div className="visual-card-image-box">
-                <img
-                  src={featuredProject.image}
-                  alt={featuredProject.imageAlt}
-                  className="visual-card-img"
-                  loading="eager"
-                  fetchPriority="high"
-                  width="720"
-                  height="450"
-                />
-                <div className="visual-card-overlay">
-                  <div className="visual-card-pill">
-                    <span className="visual-pill-dot" aria-hidden="true"></span>
-                    <span>CLIENT PROJECT · PRODUCTION BUILD</span>
-                  </div>
-                  <span className="visual-project-title">{featuredProject.title}</span>
+          {/* Right Column: Authentic Capabilities & Engineering Practice Index */}
+          <div className="hero-right-column">
+            <div className="hero-preview-card">
+              {/* Card Header */}
+              <div className="hero-preview-header">
+                <div className="hero-preview-badge">
+                  <span className="preview-badge-dot" aria-hidden="true"></span>
+                  <span>CORE DISCIPLINES &amp; OFFERINGS</span>
                 </div>
+                <span className="hero-preview-count">04 PRACTICE AREAS</span>
               </div>
 
-              <div className="visual-card-caption">
-                <div className="caption-text">
-                  <span className="caption-client">Bexley LifeScience · Client Build</span>
-                  <span className="caption-scope">Custom React · Corporate Distribution</span>
-                </div>
+              {/* Authentic Quick Services Index */}
+              <div className="hero-services-list" role="list">
+                {services.slice(0, 4).map((s) => (
+                  <a
+                    key={s.number}
+                    href="/services"
+                    className="hero-service-item"
+                    role="listitem"
+                    onClick={handleServicesClick}
+                  >
+                    <div className="hero-service-meta">
+                      <span className="hero-service-num">{s.number}</span>
+                      <span className="hero-service-title">{s.title}</span>
+                    </div>
+                    <span className="hero-service-tag">{s.tag}</span>
+                  </a>
+                ))}
+              </div>
+
+              {/* Engineering Delivery Standards (Authentic from Impact/Pillars) */}
+              <div className="hero-pillars-box">
+                <div className="pillars-label">DEVELOPMENT STANDARDS</div>
+                <ul className="pillars-list">
+                  <li className="pillar-item">
+                    <CheckCircle2 size={13} className="pillar-icon" aria-hidden="true" />
+                    <span>Sub-second loading &amp; 95+ Core Web Vitals target</span>
+                  </li>
+                  <li className="pillar-item">
+                    <CheckCircle2 size={13} className="pillar-icon" aria-hidden="true" />
+                    <span>Tested across real iPhone, Android &amp; desktop viewports</span>
+                  </li>
+                  <li className="pillar-item">
+                    <CheckCircle2 size={13} className="pillar-icon" aria-hidden="true" />
+                    <span>Direct developer access &amp; agency white-label discretion</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Action Pathways Strip */}
+              <div className="hero-pathways-strip">
                 <a
-                  href={featuredProject.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="visual-link-icon"
-                  aria-label="Visit Bexley LifeScience live client website"
+                  href="/work"
+                  className="pathway-link"
+                  onClick={handleWorkClick}
                 >
-                  <ExternalLink size={14} />
+                  <span>Selected Work (5 Projects) →</span>
+                </a>
+                <a
+                  href="/services"
+                  className="pathway-link"
+                  onClick={handleServicesClick}
+                >
+                  <span>5-Stage Process →</span>
                 </a>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Narrative & Action Cluster */}
-        <div className="hero-lower-grid">
-          <div className="hero-narrative-box">
-            <h2 className="hero-value-headline" style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)',
-              color: 'var(--text-primary)',
-              lineHeight: 1.25,
-              marginBottom: '1rem',
-              fontWeight: 800,
-              letterSpacing: '-0.02em'
-            }}>
-              Websites built to turn business attention into enquiries.
-            </h2>
-            <p className="hero-lead-text">
-              I design and develop modern, responsive websites for businesses and partner with marketing agencies
-              to deliver polished digital experiences, reliable functionality, and performance-focused implementations.
-            </p>
-          </div>
-
-          <div className="hero-cta-cluster">
-            <button
-              ref={magneticPrimaryRef}
-              type="button"
-              className="btn-hero-primary"
-              onClick={() => onOpenContact && onOpenContact('direct')}
-            >
-              <span>DISCUSS A PROJECT</span>
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </button>
-
-            <a
-              ref={magneticSecondaryRef}
-              href="#work"
-              className="btn-hero-secondary"
-              onClick={handleScrollToWork}
-            >
-              <span>EXPLORE WORK</span>
-              <ArrowDown size={15} aria-hidden="true" />
-            </a>
-
-            <a
-              ref={magneticPdfRef}
-              href="/charles-naveen-portfolio.pdf"
-              download="Charles-Naveen-Portfolio.pdf"
-              className="btn-hero-secondary btn-hero-pdf"
-              title="Download compact portfolio PDF for agency review"
-            >
-              <Download size={14} aria-hidden="true" />
-              <span>PORTFOLIO PDF</span>
-            </a>
           </div>
         </div>
 

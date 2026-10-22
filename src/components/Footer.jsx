@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUp, Download } from 'lucide-react';
 import { contactConfig } from '../data/contactConfig';
 
-export default function Footer() {
+export default function Footer({ onNavigate }) {
   const currentYear = new Date().getFullYear();
 
   const handleScrollToTop = () => {
@@ -10,15 +10,20 @@ export default function Footer() {
   };
 
   const navLinks = [
-    { label: 'Work', href: '#work' },
-    { label: 'Services', href: '#services' },
-    { label: 'Standards', href: '#impact' },
-    { label: 'Start a Project', href: '#start-project' },
-    { label: 'Agencies', href: '#collaboration' },
-    { label: 'Process', href: '#process' },
-    { label: 'About', href: '#about' },
-    { label: 'Contact', href: '#contact' }
+    { label: 'Home', href: '/', route: '/' },
+    { label: 'Work', href: '/work', route: '/work' },
+    { label: 'Services', href: '/services', route: '/services' },
+    { label: 'Contact', href: '/contact', route: '/contact' }
   ];
+
+  const handleLinkClick = (e, link) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate(link.route, link.targetHash);
+    } else {
+      window.location.href = link.href;
+    }
+  };
 
   return (
     <footer className="master-footer" role="contentinfo">
@@ -46,7 +51,11 @@ export default function Footer() {
             <ul className="footer-links-list">
               {navLinks.map((link) => (
                 <li key={link.label}>
-                  <a href={link.href} className="footer-nav-anchor">
+                  <a
+                    href={link.href}
+                    className="footer-nav-anchor"
+                    onClick={(e) => handleLinkClick(e, link)}
+                  >
                     {link.label}
                   </a>
                 </li>
@@ -56,7 +65,7 @@ export default function Footer() {
                   href="/charles-naveen-portfolio.pdf"
                   download="Charles-Naveen-Portfolio.pdf"
                   className="footer-nav-anchor"
-                  style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+                  style={{ color: 'var(--accent-lime)', fontWeight: 600 }}
                 >
                   Portfolio PDF ↓
                 </a>
