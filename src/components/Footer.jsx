@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Download } from 'lucide-react';
 import { contactConfig } from '../data/contactConfig';
 
 export default function Footer() {
@@ -11,12 +11,13 @@ export default function Footer() {
 
   const navLinks = [
     { label: 'Work', href: '#work' },
-    { label: 'Capabilities', href: '#services' },
-    { label: 'Impact', href: '#impact' },
+    { label: 'Services', href: '#services' },
+    { label: 'Standards', href: '#impact' },
+    { label: 'Start a Project', href: '#start-project' },
     { label: 'Agencies', href: '#collaboration' },
     { label: 'Process', href: '#process' },
     { label: 'About', href: '#about' },
-    { label: 'Contact', href: '#contact' },
+    { label: 'Contact', href: '#contact' }
   ];
 
   return (
@@ -29,7 +30,7 @@ export default function Footer() {
               <span className="brand-dot-lime" aria-hidden="true"></span>
             </div>
             <p className="footer-mission-statement">
-              Creative Web Developer crafting high-performance business websites, digital experiences, and reliable agency partnerships.
+              Freelance Web Developer crafting high-performance websites for businesses and dependable white-label development for marketing agencies.
             </p>
             <div className="footer-contact-fast">
               <a href={`mailto:${contactConfig.emailPlaceholder}`} className="footer-fast-link">
@@ -50,13 +51,23 @@ export default function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <a
+                  href="/charles-naveen-portfolio.pdf"
+                  download="Charles-Naveen-Portfolio.pdf"
+                  className="footer-nav-anchor"
+                  style={{ color: 'var(--accent-primary)', fontWeight: 600 }}
+                >
+                  Portfolio PDF ↓
+                </a>
+              </li>
             </ul>
           </nav>
         </div>
 
         <div className="footer-bottom-row">
           <p className="footer-legal-copy">
-            © {currentYear} Charles Naveen. Engineered with custom React &amp; modern CSS.
+            © {currentYear} Charles Naveen. Freelance Web Developer. Engineered with custom React &amp; modern CSS.
           </p>
 
           <button

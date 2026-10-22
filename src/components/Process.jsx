@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { workingProcess } from '../data/projects';
+import { Clock, ShieldCheck } from 'lucide-react';
 import { gsap, prefersReducedMotion } from '../utils/motion';
 
 export default function Process() {
@@ -44,7 +45,7 @@ export default function Process() {
         },
         y: 45,
         opacity: 0,
-        stagger: 0.18,
+        stagger: 0.15,
         duration: 0.8,
         ease: 'back.out(1.4)'
       });
@@ -62,19 +63,19 @@ export default function Process() {
             <span className="studio-tag">METHODOLOGY</span>
             <span style={{ color: 'var(--border-medium)' }}>/</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              FOUR DISCIPLINED STAGES
+              FIVE DISCIPLINED STAGES
             </span>
           </div>
           <h2 className="process-monument-title">
             HOW THE WORK GOES
           </h2>
           <p className="section-lead">
-            Every project follows a transparent four-stage progression from discovery to final cross-device
-            refinement. Clear milestones, continuous visibility, and zero guesswork.
+            Every website project follows a transparent five-stage progression from initial requirements
+            to final deployment and handoff. Clear milestones, continuous visibility, and zero guesswork.
           </p>
         </div>
 
-        {/* Circular Stepper Row (Demo.mp4 Style) */}
+        {/* Circular Stepper Row */}
         <div className="process-stepper-track" role="list">
           <div className="stepper-horizontal-line" aria-hidden="true"></div>
 
@@ -97,6 +98,57 @@ export default function Process() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Realistic Timeline & Maintenance Guidance Notes */}
+        <div style={{
+          marginTop: '2.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '1.25rem',
+          maxWidth: '960px'
+        }}>
+          <div style={{
+            padding: '1rem 1.25rem',
+            backgroundColor: 'var(--bg-white)',
+            border: '1.5px solid var(--text-near-black)',
+            boxShadow: '4px 4px 0px var(--text-near-black)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem'
+          }}>
+            <Clock size={18} style={{ color: 'var(--text-near-black)', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ display: 'block', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--text-near-black)', marginBottom: '0.25rem', letterSpacing: '0.04em' }}>
+                REALISTIC DELIVERY SCHEDULES:
+              </strong>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary-ivory)', lineHeight: 1.5, margin: 0 }}>
+                Standard business websites and landing page builds typically launch within 1 to 3 weeks. Turnaround depends on scope complexity, content readiness, and feedback cycles.
+              </p>
+            </div>
+          </div>
+
+          <div style={{
+            padding: '1rem 1.25rem',
+            backgroundColor: 'var(--bg-white)',
+            border: '1.5px solid var(--text-near-black)',
+            boxShadow: '4px 4px 0px var(--text-near-black)',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.75rem'
+          }}>
+            <ShieldCheck size={18} style={{ color: 'var(--text-near-black)', flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ display: 'block', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', textTransform: 'uppercase', color: 'var(--text-near-black)', marginBottom: '0.25rem', letterSpacing: '0.04em' }}>
+                POST-LAUNCH &amp; MAINTENANCE:
+              </strong>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary-ivory)', lineHeight: 1.5, margin: 0 }}>
+                All agreed project assets and documentation are handed over at launch. Ongoing technical maintenance, regular content updates, and future enhancements can be discussed separately.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

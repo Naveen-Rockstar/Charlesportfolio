@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, Menu, X, ArrowRight } from 'lucide-react';
+import { ArrowUpRight, Menu, X, ArrowRight, Download } from 'lucide-react';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { contactConfig } from '../data/contactConfig';
 
@@ -7,6 +7,7 @@ export default function Navbar({ onOpenContact }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const magneticCtaRef = useMagnetic(0.25);
+  const magneticPdfRef = useMagnetic(0.2);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,11 +42,12 @@ export default function Navbar({ onOpenContact }) {
 
   const navLinks = [
     { label: 'Work', href: '#work', number: '01' },
-    { label: 'Capabilities', href: '#services', number: '02' },
-    { label: 'Impact', href: '#impact', number: '03' },
-    { label: 'Agencies', href: '#collaboration', number: '04' },
-    { label: 'Process', href: '#process', number: '05' },
-    { label: 'About', href: '#about', number: '06' },
+    { label: 'Services', href: '#services', number: '02' },
+    { label: 'Standards', href: '#impact', number: '03' },
+    { label: 'Start a Project', href: '#start-project', number: '04' },
+    { label: 'Agencies', href: '#collaboration', number: '05' },
+    { label: 'Process', href: '#process', number: '06' },
+    { label: 'About', href: '#about', number: '07' },
   ];
 
   const handleLinkClick = (e, href) => {
@@ -75,7 +77,7 @@ export default function Navbar({ onOpenContact }) {
       <header className={`navbar ${scrolled ? 'is-scrolled' : ''}`} role="banner">
         <div className="container navbar-inner">
           {/* Brand Link */}
-          <a href="#" className="brand-link" aria-label="Charles Naveen — Portfolio Homepage">
+          <a href="#" className="brand-link" aria-label="Charles Naveen — Freelance Web Developer Homepage">
             <span className="brand-name">CHARLES NAVEEN</span>
             <span className="brand-lime-dot" aria-hidden="true"></span>
           </a>
@@ -105,11 +107,30 @@ export default function Navbar({ onOpenContact }) {
             </div>
 
             <a
+              ref={magneticPdfRef}
+              href="/charles-naveen-portfolio.pdf"
+              download="Charles-Naveen-Portfolio.pdf"
+              className="nav-item-link nav-pdf-link"
+              title="Download 3-page compact portfolio PDF"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '0.4rem 0.75rem',
+                fontSize: 'var(--text-xs)',
+                fontFamily: 'var(--font-mono)'
+              }}
+            >
+              <Download size={13} aria-hidden="true" />
+              <span>PDF</span>
+            </a>
+
+            <a
               ref={magneticCtaRef}
               href="#contact"
               className="nav-cta-pill"
               onClick={handleTalkClick}
-              aria-label="Contact Charles Naveen — Let's Talk"
+              aria-label="Write Me — Contact Charles Naveen"
             >
               <span>WRITE ME</span>
               <ArrowUpRight size={13} aria-hidden="true" />
@@ -129,14 +150,14 @@ export default function Navbar({ onOpenContact }) {
         </div>
       </header>
 
-      {/* Full-Screen Editorial Menu Overlay (animation.mp4 Style) */}
+      {/* Full-Screen Editorial Menu Overlay */}
       <div
         className={`fullscreen-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}
         aria-hidden={!mobileMenuOpen}
       >
         <div className="container menu-overlay-inner">
           <div className="menu-overlay-header">
-            <span className="overlay-brand">CHARLES NAVEEN</span>
+            <span className="overlay-brand">CHARLES NAVEEN · FREELANCE DEV</span>
             <button
               type="button"
               className="overlay-close-btn"
@@ -163,13 +184,24 @@ export default function Navbar({ onOpenContact }) {
                     </a>
                   </li>
                 ))}
+                <li className="overlay-link-item">
+                  <a
+                    href="/charles-naveen-portfolio.pdf"
+                    download="Charles-Naveen-Portfolio.pdf"
+                    className="overlay-anchor"
+                  >
+                    <span className="overlay-link-num">08</span>
+                    <span className="overlay-link-text">Download Portfolio PDF</span>
+                    <Download size={22} className="overlay-link-arrow" aria-hidden="true" />
+                  </a>
+                </li>
                 <li className="overlay-link-item contact-item">
                   <a
                     href="#contact"
                     onClick={handleTalkClick}
                     className="overlay-anchor highlight"
                   >
-                    <span className="overlay-link-num">07</span>
+                    <span className="overlay-link-num">09</span>
                     <span className="overlay-link-text">WRITE ME</span>
                     <ArrowUpRight size={24} className="overlay-link-arrow" aria-hidden="true" />
                   </a>
@@ -191,12 +223,12 @@ export default function Navbar({ onOpenContact }) {
               <div className="overlay-meta-group">
                 <span className="overlay-meta-title">LOCATION</span>
                 <p className="overlay-meta-text">{contactConfig.location}</p>
-                <p className="overlay-meta-subtext">Open to remote projects worldwide.</p>
+                <p className="overlay-meta-subtext">Open to business projects and agency partnerships worldwide.</p>
               </div>
 
               <div className="overlay-meta-group">
                 <span className="overlay-meta-title">AVAILABILITY</span>
-                <p className="overlay-meta-text highlight-lime">● Taking on selected client builds for Q1/Q2</p>
+                <p className="overlay-meta-text highlight-lime">● Taking on selected client builds &amp; subcontracting</p>
               </div>
             </div>
           </div>

@@ -48,8 +48,8 @@ export default function ProjectGrid({ onSelectProject }) {
 
         if (img) {
           tl.from(img, {
-            scale: 1.15,
-            duration: 1.2,
+            scale: 1.12,
+            duration: 1.1,
             ease: 'power2.out'
           }, '-=0.6');
         }
@@ -67,7 +67,7 @@ export default function ProjectGrid({ onSelectProject }) {
     }, rootRef);
 
     return () => ctx.revert();
-  }, [filter]); // Re-run when filter changes so new cards animate nicely
+  }, [filter]);
 
   const allProjects = [
     {
@@ -105,8 +105,8 @@ export default function ProjectGrid({ onSelectProject }) {
   const filteredProjects = filter === 'all'
     ? allProjects
     : filter === 'client'
-      ? allProjects.filter((p) => p.status.includes('CLIENT'))
-      : allProjects.filter((p) => !p.status.includes('CLIENT'));
+      ? allProjects.filter((p) => p.isClientProject)
+      : allProjects.filter((p) => !p.isClientProject);
 
   return (
     <section id="work" ref={rootRef} className="selected-work-section" aria-label="Selected Projects and Client Work">
@@ -144,7 +144,7 @@ export default function ProjectGrid({ onSelectProject }) {
               className={`filter-pill ${filter === 'client' ? 'is-active' : ''}`}
               onClick={() => setFilter('client')}
             >
-              Client Builds (1)
+              Client Projects (1)
             </button>
             <button
               type="button"
@@ -153,12 +153,12 @@ export default function ProjectGrid({ onSelectProject }) {
               className={`filter-pill ${filter === 'demo' ? 'is-active' : ''}`}
               onClick={() => setFilter('demo')}
             >
-              Demonstration Series (4)
+              Concepts &amp; Demos (4)
             </button>
           </div>
         </div>
 
-        {/* Color-Blocked Editorial Project Cards (Demo.mp4 Style) */}
+        {/* Color-Blocked Editorial Project Cards */}
         <div className="work-panels-grid">
           {filteredProjects.map((project, idx) => (
             <article
@@ -170,7 +170,7 @@ export default function ProjectGrid({ onSelectProject }) {
                 <div className="panel-meta-left">
                   <span className="panel-badge-status">
                     <span className="panel-badge-dot" aria-hidden="true"></span>
-                    <span>{project.status}</span>
+                    <span>{project.statusBadge || project.status}</span>
                   </span>
                   <span className="panel-category-label">{project.category}</span>
                 </div>
@@ -184,9 +184,11 @@ export default function ProjectGrid({ onSelectProject }) {
                   <p className="panel-tagline">{project.tagline}</p>
                   <p className="panel-desc">{project.description}</p>
 
-                  {/* Highlights / Deliverables */}
+                  {/* Highlights / Focus */}
                   <div className="panel-focus-box">
-                    <div className="panel-focus-title">FOCUS &amp; ARCHITECTURE:</div>
+                    <div className="panel-focus-title">
+                      {project.isClientProject ? 'DELIVERED SCOPE & HIGHLIGHTS:' : 'CONCEPT OBJECTIVE & ARCHITECTURE:'}
+                    </div>
                     <ul className="panel-focus-list">
                       {(project.technicalHighlights || project.focusAreas || []).slice(0, 3).map((item, fIdx) => (
                         <li key={fIdx} className="panel-focus-item">
@@ -196,7 +198,7 @@ export default function ProjectGrid({ onSelectProject }) {
                     </ul>
                   </div>
 
-                  {/* Dotted Separator Line (Demo.mp4 Style) */}
+                  {/* Dotted Separator Line */}
                   <div className="panel-dotted-line" aria-hidden="true"></div>
 
                   {/* Actions Row */}
@@ -208,7 +210,7 @@ export default function ProjectGrid({ onSelectProject }) {
                       className="panel-btn-live"
                       aria-label={`Open live link for ${project.title}`}
                     >
-                      <span>VIEW LIVE SITE</span>
+                      <span>{project.isClientProject ? 'VIEW LIVE SITE' : 'VIEW LIVE DEMO'}</span>
                       <ArrowUpRight size={15} aria-hidden="true" />
                     </a>
 
@@ -219,7 +221,7 @@ export default function ProjectGrid({ onSelectProject }) {
                         onClick={() => onSelectProject(project)}
                       >
                         <FileText size={14} aria-hidden="true" />
-                        <span>SPEC DETAILS</span>
+                        <span>CASE SPEC</span>
                       </button>
                     )}
                   </div>
@@ -240,13 +242,13 @@ export default function ProjectGrid({ onSelectProject }) {
                         src={project.image}
                         alt={project.imageAlt}
                         className="panel-project-img"
-                        loading="eager"
+                        loading={idx === 0 && filter === 'all' ? 'eager' : 'lazy'}
                         decoding="async"
-                        width="1200"
-                        height="750"
+                        width="1440"
+                        height="900"
                       />
                       <div className="panel-image-hover-indicator">
-                        <span>OPEN LIVE DEMO ↗</span>
+                        <span>{project.isClientProject ? 'OPEN LIVE SITE ↗' : 'OPEN LIVE DEMO ↗'}</span>
                       </div>
                     </div>
                   </a>

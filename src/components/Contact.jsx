@@ -1,27 +1,39 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowUpRight, ArrowRight, Mail, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
+import { ArrowUpRight, Mail, MessageSquare, CheckCircle2, Copy, Check } from 'lucide-react';
 import { contactConfig } from '../data/contactConfig';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { gsap, prefersReducedMotion } from '../utils/motion';
 
-export default function Contact({ defaultIntent = 'direct' }) {
+const COUNTRY_CODES = [
+  { code: '+91', country: 'IN', label: '+91 (India)' },
+  { code: '+1', country: 'US', label: '+1 (US / Canada)' },
+  { code: '+44', country: 'UK', label: '+44 (UK)' },
+  { code: '+971', country: 'AE', label: '+971 (UAE)' },
+  { code: '+65', country: 'SG', label: '+65 (Singapore)' },
+  { code: '+61', country: 'AU', label: '+61 (Australia)' },
+  { code: '+49', country: 'DE', label: '+49 (Germany)' },
+  { code: '+33', country: 'FR', label: '+33 (France)' },
+  { code: '+other', country: 'GL', label: 'Other' }
+];
+
+export default function Contact() {
   const rootRef = useRef(null);
-  const [intent, setIntent] = useState(defaultIntent);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
     const ctx = gsap.context(() => {
-      // Banner headline reveal (WRITE ME ->)
+      // Banner headline reveal
       gsap.from('.contact-banner-head', {
         scrollTrigger: {
           trigger: '.contact-banner-head',
           start: 'top 85%',
           toggleActions: 'play none none reverse'
         },
-        y: 40,
+        y: 35,
         opacity: 0,
-        duration: 0.8,
+        duration: 0.75,
         ease: 'power3.out'
       });
 
@@ -32,14 +44,26 @@ export default function Contact({ defaultIntent = 'direct' }) {
           start: 'top 85%',
           toggleActions: 'play none none reverse'
         },
-        x: -40,
+        x: -30,
         opacity: 0,
-        duration: 1,
-        ease: 'back.out(1.7)'
+        duration: 0.85,
+        ease: 'power3.out'
       });
 
       // Split layout: Channels & Form entrance
       gsap.from('.contact-info-card', {
+        scrollTrigger: {
+          trigger: '.contact-layout-grid',
+          start: 'top 80%',
+          toggleActions: 'play none none reverse'
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.out'
+      });
+
+      gsap.from('.contact-form-container', {
         scrollTrigger: {
           trigger: '.contact-layout-grid',
           start: 'top 80%',
@@ -50,28 +74,16 @@ export default function Contact({ defaultIntent = 'direct' }) {
         duration: 0.75,
         ease: 'power2.out'
       });
-
-      gsap.from('.contact-form-container', {
-        scrollTrigger: {
-          trigger: '.contact-layout-grid',
-          start: 'top 80%',
-          toggleActions: 'play none none reverse'
-        },
-        y: 45,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out'
-      });
     }, rootRef);
 
     return () => ctx.revert();
   }, []);
+
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    company: '',
-    projectType: 'business-website',
-    description: ''
+    countryCode: '+91',
+    phone: '',
+    projectDetails: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -79,24 +91,6 @@ export default function Contact({ defaultIntent = 'direct' }) {
   const [submittedData, setSubmittedData] = useState(null);
 
   const magneticSubmitBtnRef = useMagnetic(0.2);
-
-  useEffect(() => {
-    if (defaultIntent) {
-      setIntent(defaultIntent);
-      setFormData((prev) => ({
-        ...prev,
-        projectType: defaultIntent === 'agency' ? 'agency-collaboration' : 'business-website'
-      }));
-    }
-  }, [defaultIntent]);
-
-  const handleIntentChange = (newIntent) => {
-    setIntent(newIntent);
-    setFormData((prev) => ({
-      ...prev,
-      projectType: newIntent === 'agency' ? 'agency-collaboration' : 'business-website'
-    }));
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -109,18 +103,18 @@ export default function Contact({ defaultIntent = 'direct' }) {
   const validate = () => {
     const errs = {};
     if (!formData.name.trim()) {
-      errs.name = 'Please provide your name.';
+      errs.name = 'Please enter your name.';
+    } else if (formData.name.trim().length < 2) {
+      errs.name = 'Name must be at least 2 characters.';
     }
-    if (!formData.email.trim()) {
-      errs.email = 'Please provide an email address.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errs.email = 'Please enter a valid email address.';
+
+    const cleanPhone = formData.phone.replace(/[\s\-()]/g, '');
+    if (!cleanPhone) {
+      errs.phone = 'Please enter your mobile or WhatsApp number.';
+    } else if (!/^\+?[0-9]{7,15}$/.test(cleanPhone)) {
+      errs.phone = 'Please enter a valid mobile number (7–15 digits).';
     }
-    if (!formData.description.trim()) {
-      errs.description = 'Please include a brief description of your requirements.';
-    } else if (formData.description.trim().length < 10) {
-      errs.description = 'Please write at least a few words about your project.';
-    }
+
     return errs;
   };
 
@@ -135,55 +129,80 @@ export default function Contact({ defaultIntent = 'direct' }) {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      setSubmittedData({ ...formData, intent });
-    }, 350);
+      setSubmittedData({ ...formData });
+    }, 200);
   };
 
   const handleReset = () => {
     setSubmittedData(null);
     setFormData({
       name: '',
-      email: '',
-      company: '',
-      projectType: intent === 'agency' ? 'agency-collaboration' : 'business-website',
-      description: ''
+      countryCode: '+91',
+      phone: '',
+      projectDetails: ''
     });
     setErrors({});
+    setCopied(false);
+  };
+
+  const getFullPhone = () => {
+    if (!submittedData) return '';
+    const prefix = submittedData.countryCode === '+other' ? '' : `${submittedData.countryCode} `;
+    return `${prefix}${submittedData.phone.trim()}`;
+  };
+
+  const getBriefSummaryText = () => {
+    if (!submittedData) return '';
+    const details = submittedData.projectDetails.trim()
+      ? submittedData.projectDetails.trim()
+      : 'Interested in discussing a website development project.';
+
+    return (
+      `Project Enquiry for Charles Naveen\n` +
+      `----------------------------------\n` +
+      `From: ${submittedData.name.trim()}\n` +
+      `Mobile / WhatsApp: ${getFullPhone()}\n` +
+      `Details:\n${details}`
+    );
+  };
+
+  const handleCopyBrief = () => {
+    const text = getBriefSummaryText();
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 3000);
   };
 
   const generateMailtoLink = () => {
     if (!submittedData) return `mailto:${contactConfig.emailPlaceholder}`;
-    const subject = encodeURIComponent(`Project Inquiry from ${submittedData.name} [${submittedData.projectType}]`);
-    const body = encodeURIComponent(
-      `Name: ${submittedData.name}\n` +
-      `Email: ${submittedData.email}\n` +
-      `Company: ${submittedData.company || 'N/A'}\n` +
-      `Type: ${submittedData.projectType}\n\n` +
-      `Project Brief:\n${submittedData.description}`
-    );
+    const subject = encodeURIComponent(`Project Enquiry from ${submittedData.name.trim()}`);
+    const body = encodeURIComponent(getBriefSummaryText());
     return `mailto:${contactConfig.emailPlaceholder}?subject=${subject}&body=${body}`;
   };
 
   const generateWhatsAppLink = () => {
     if (!submittedData) return `https://wa.me/${contactConfig.whatsappPlaceholder}`;
-    const text = encodeURIComponent(
-      `Hi Charles Naveen, I submitted a project enquiry from your portfolio:\n` +
-      `Name: ${submittedData.name}\n` +
-      `Company: ${submittedData.company || 'N/A'}\n` +
-      `Type: ${submittedData.projectType}\n` +
-      `Brief: ${submittedData.description}`
-    );
-    return `https://wa.me/${contactConfig.whatsappPlaceholder}?text=${text}`;
+    const details = submittedData.projectDetails.trim()
+      ? submittedData.projectDetails.trim()
+      : 'Looking to discuss a website project.';
+
+    const text =
+      `Hi Charles, I am submitting an enquiry from your portfolio:\n\n` +
+      `• Name: ${submittedData.name.trim()}\n` +
+      `• Mobile / WhatsApp: ${getFullPhone()}\n` +
+      `• Details: ${details}`;
+
+    return `https://wa.me/${contactConfig.whatsappPlaceholder}?text=${encodeURIComponent(text)}`;
   };
 
   return (
     <section id="contact" ref={rootRef} className="contact-dark-section" aria-label="Contact Charles Naveen">
       <div className="container">
-        {/* Massive Headline Banner (Demo.mp4 Style: WRITE ME ->) */}
+        {/* Headline Banner */}
         <div className="contact-banner-head">
           <div className="contact-meta-eyebrow">
             <span className="contact-live-dot" aria-hidden="true"></span>
-            <span>AVAILABLE FOR COMMISSIONED WORK &amp; AGENCY PARTNERSHIPS</span>
+            <span>AVAILABLE FOR CLIENT BUILDS &amp; AGENCY PARTNERSHIPS</span>
           </div>
 
           <div className="contact-huge-title-row">
@@ -192,7 +211,7 @@ export default function Contact({ defaultIntent = 'direct' }) {
             </h2>
           </div>
           <p className="contact-subheading">
-            LET'S BUILD SOMETHING MEANINGFUL.
+            LET'S DISCUSS YOUR PROJECT REQUIREMENTS.
           </p>
         </div>
 
@@ -202,10 +221,10 @@ export default function Contact({ defaultIntent = 'direct' }) {
           <div className="contact-info-col">
             <div className="contact-info-card">
               <span className="contact-card-label">DIRECT COMMUNICATION CHANNELS</span>
-              
+
               <p className="contact-editorial-copy">
-                Have a project in mind, need a quote, or want to discuss an ongoing agency partnership?
-                Reach out directly via email or WhatsApp for a response within 24 business hours.
+                Have a project in mind, need an indicative quote, or want to discuss an ongoing agency partnership?
+                Reach out directly via email or WhatsApp. I respond to all genuine inquiries within 24 business hours.
               </p>
 
               <div className="contact-channel-item">
@@ -234,7 +253,7 @@ export default function Contact({ defaultIntent = 'direct' }) {
 
               <div className="contact-channel-item">
                 <span className="channel-tag-label">LOCATION &amp; BASE</span>
-                <span className="channel-value-text">{contactConfig.location} · Global Remote</span>
+                <span className="channel-value-text">{contactConfig.location} · Remote Worldwide</span>
               </div>
 
               <div className="contact-channel-item">
@@ -244,29 +263,39 @@ export default function Contact({ defaultIntent = 'direct' }) {
             </div>
           </div>
 
-          {/* Right Column: Interactive Consultation Form */}
+          {/* Right Column: Simplified Consultation Form */}
           <div className="contact-form-col">
             <div className="contact-form-container">
-              {/* Intent Switcher Tabs */}
-              <div className="form-intent-tabs" role="tablist" aria-label="Enquiry Intent">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={intent === 'direct'}
-                  className={`intent-tab-pill ${intent === 'direct' ? 'is-active' : ''}`}
-                  onClick={() => handleIntentChange('direct')}
-                >
-                  Direct Client Project
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={intent === 'agency'}
-                  className={`intent-tab-pill ${intent === 'agency' ? 'is-active' : ''}`}
-                  onClick={() => handleIntentChange('agency')}
-                >
-                  Agency Collaboration
-                </button>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  color: 'var(--accent-lime)',
+                  textTransform: 'uppercase',
+                  display: 'block',
+                  marginBottom: '0.25rem'
+                }}>
+                  FAST INQUIRY
+                </span>
+                <h3 style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 800,
+                  color: 'var(--bg-ivory)',
+                  margin: 0
+                }}>
+                  LET'S TALK ABOUT YOUR PROJECT
+                </h3>
+                <p style={{
+                  fontSize: 'var(--text-xs)',
+                  color: 'var(--text-inverse-muted)',
+                  marginTop: '0.35rem',
+                  marginBottom: 0
+                }}>
+                  Share your details and I'll get back to you.
+                </p>
               </div>
 
               {submittedData ? (
@@ -274,29 +303,38 @@ export default function Contact({ defaultIntent = 'direct' }) {
                   <div className="success-icon-wrap">
                     <CheckCircle2 size={32} color="#D8F33A" />
                   </div>
-                  <h3 className="success-heading">Inquiry Formatted &amp; Ready</h3>
+                  <h3 className="success-heading">Enquiry Ready to Dispatch</h3>
                   <p className="success-subtext">
-                    Thank you, <strong>{submittedData.name}</strong>. To guarantee direct delivery without
-                    relying on server queues, select your preferred dispatch route below:
+                    Thank you, <strong>{submittedData.name}</strong>. Your enquiry details are ready.
+                    Select your preferred direct route below:
                   </p>
 
                   <div className="success-action-buttons">
                     <a
-                      href={generateMailtoLink()}
+                      href={generateWhatsAppLink()}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="btn-success-primary"
+                    >
+                      <MessageSquare size={16} aria-hidden="true" />
+                      <span>CONTINUE TO WHATSAPP ↗</span>
+                    </a>
+                    <a
+                      href={generateMailtoLink()}
+                      className="btn-success-secondary"
                     >
                       <Mail size={16} aria-hidden="true" />
                       <span>DISPATCH VIA EMAIL</span>
                     </a>
-                    <a
-                      href={generateWhatsAppLink()}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={handleCopyBrief}
                       className="btn-success-secondary"
+                      style={{ border: '1px dashed var(--border-medium)' }}
                     >
-                      <MessageSquare size={16} aria-hidden="true" />
-                      <span>OPEN IN WHATSAPP</span>
-                    </a>
+                      {copied ? <Check size={16} color="#D8F33A" /> : <Copy size={16} aria-hidden="true" />}
+                      <span>{copied ? 'COPIED TO CLIPBOARD' : 'COPY ENQUIRY TEXT'}</span>
+                    </button>
                   </div>
 
                   <div className="success-reset-row">
@@ -305,118 +343,87 @@ export default function Contact({ defaultIntent = 'direct' }) {
                       onClick={handleReset}
                       className="btn-reset-form"
                     >
-                      Submit Another Inquiry ↺
+                      Edit or Submit Another Inquiry ↺
                     </button>
                   </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} noValidate className="contact-form-element">
-                  <div className="form-fields-row">
-                    <div className="form-group">
-                      <label htmlFor="name" className="input-label">
-                        Your Name <span className="req-star">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="e.g. Alex Morgan"
-                        className="dark-studio-input"
-                        aria-required="true"
-                        aria-invalid={!!errors.name}
-                      />
-                      {errors.name && <span className="error-note">{errors.name}</span>}
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email" className="input-label">
-                        Email Address <span className="req-star">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="alex@company.com"
-                        className="dark-studio-input"
-                        aria-required="true"
-                        aria-invalid={!!errors.email}
-                      />
-                      {errors.email && <span className="error-note">{errors.email}</span>}
-                    </div>
-                  </div>
-
-                  <div className="form-fields-row">
-                    <div className="form-group">
-                      <label htmlFor="company" className="input-label">
-                        Company or Brand
-                      </label>
-                      <input
-                        type="text"
-                        id="company"
-                        name="company"
-                        value={formData.company}
-                        onChange={handleChange}
-                        placeholder="e.g. Acme Studio"
-                        className="dark-studio-input"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="projectType" className="input-label">
-                        Requirement Type
-                      </label>
-                      <select
-                        id="projectType"
-                        name="projectType"
-                        value={formData.projectType}
-                        onChange={handleChange}
-                        className="dark-studio-select"
-                      >
-                        {intent === 'direct' ? (
-                          <>
-                            <option value="business-website">New Business Website</option>
-                            <option value="landing-page">High-Conversion Landing Page</option>
-                            <option value="website-redesign">Website Redesign &amp; Speed</option>
-                            <option value="technical-seo">Technical SEO &amp; Core Web Vitals</option>
-                            <option value="ai-automation">AI Automation / Integration</option>
-                            <option value="custom-inquiry">Custom Development</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value="agency-collaboration">White-Label Development Partnership</option>
-                            <option value="agency-landing-pages">Agency Client Landing Pages</option>
-                            <option value="agency-redesigns">Client Website Redesigns</option>
-                            <option value="agency-overflow">Overflow Development Bandwidth</option>
-                          </>
-                        )}
-                      </select>
-                    </div>
+                  <div className="form-group">
+                    <label htmlFor="contact-name" className="input-label">
+                      Name <span className="req-star">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="contact-name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Your full name"
+                      className="dark-studio-input"
+                      aria-required="true"
+                      aria-invalid={!!errors.name}
+                      autoComplete="name"
+                    />
+                    {errors.name && <span className="error-note" role="alert">{errors.name}</span>}
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="description" className="input-label">
-                      Project Brief <span className="req-star">*</span>
+                    <label htmlFor="contact-phone" className="input-label">
+                      Mobile Number / WhatsApp <span className="req-star">*</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                        className="dark-studio-select"
+                        style={{
+                          width: 'auto',
+                          minWidth: '115px',
+                          flexShrink: 0,
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.85rem'
+                        }}
+                        aria-label="Country Code"
+                      >
+                        {COUNTRY_CODES.map((item) => (
+                          <option key={item.code} value={item.code}>
+                            {item.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="tel"
+                          id="contact-phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="93849 59626"
+                          className="dark-studio-input"
+                          aria-required="true"
+                          aria-invalid={!!errors.phone}
+                          autoComplete="tel-national"
+                        />
+                      </div>
+                    </div>
+                    {errors.phone && <span className="error-note" role="alert">{errors.phone}</span>}
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="contact-details" className="input-label">
+                      Project Details <span className="opt-tag">(Optional)</span>
                     </label>
                     <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
+                      id="contact-details"
+                      name="projectDetails"
+                      value={formData.projectDetails}
                       onChange={handleChange}
-                      placeholder={
-                        intent === 'agency'
-                          ? "Tell me about your agency, your typical client projects, and what development support you need..."
-                          : "Describe your business, current website status, project goals, and estimated timeline..."
-                      }
-                      rows={5}
+                      placeholder="Briefly tell me what you need."
+                      rows={4}
                       className="dark-studio-textarea"
-                      aria-required="true"
-                      aria-invalid={!!errors.description}
                     ></textarea>
-                    {errors.description && <span className="error-note">{errors.description}</span>}
                   </div>
 
                   <button
@@ -424,14 +431,12 @@ export default function Contact({ defaultIntent = 'direct' }) {
                     type="submit"
                     className="btn-dark-submit"
                     disabled={isSubmitting}
+                    style={{ width: '100%', justifyContent: 'center' }}
                   >
                     {isSubmitting ? (
-                      <span>FORMATTING INQUIRY...</span>
+                      <span>PREPARING ENQUIRY...</span>
                     ) : (
-                      <>
-                        <span>{intent === 'agency' ? 'DISCUSS AGENCY PARTNERSHIP' : 'SEND PROJECT INQUIRY'}</span>
-                        <ArrowUpRight size={16} aria-hidden="true" />
-                      </>
+                      <span>Send Enquiry ↗</span>
                     )}
                   </button>
                 </form>

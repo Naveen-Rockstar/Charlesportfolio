@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Marquee from './components/Marquee';
@@ -6,8 +6,9 @@ import Statement from './components/Statement';
 import Services from './components/Services';
 import ImpactComparison from './components/ImpactComparison';
 import ProjectGrid from './components/ProjectGrid';
-import Collaboration from './components/Collaboration';
 import Process from './components/Process';
+import StartProject from './components/StartProject';
+import Collaboration from './components/Collaboration';
 import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -18,8 +19,37 @@ import { useScrollReveal } from './hooks/useScrollReveal';
 export default function App() {
   const [activeModalProject, setActiveModalProject] = useState(null);
   const [contactIntent, setContactIntent] = useState('direct');
+  const [selectedProjectType, setSelectedProjectType] = useState(null);
+  const [projectIntent, setProjectIntent] = useState('business');
   const mainRef = useRef(null);
   useScrollReveal(mainRef);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(window.location.hash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, []);
+
+  const handleStartProject = (typeOrIntent = 'business') => {
+    if (typeOrIntent === 'agency') {
+      setProjectIntent('agency');
+      setSelectedProjectType('agency-whitelabel');
+    } else if (typeOrIntent && typeOrIntent !== 'business' && typeOrIntent !== 'direct') {
+      setSelectedProjectType(typeOrIntent);
+      setProjectIntent('business');
+    } else {
+      setProjectIntent('business');
+    }
+    const startSection = document.querySelector('#start-project');
+    if (startSection) {
+      startSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleOpenContact = (intent = 'direct') => {
     setContactIntent(intent);
@@ -39,39 +69,45 @@ export default function App() {
 
       {/* Main Content Landmark */}
       <main id="main-content" ref={mainRef}>
-        {/* Section 1: Hero — First Screen Impact with Circular DEV Badge & Editorial Frame */}
+        {/* Section 1: Hero — First Screen Impact */}
         <Hero
-          onOpenContact={handleOpenContact}
+          onOpenContact={() => handleStartProject('business')}
           onSelectProject={setActiveModalProject}
         />
 
         {/* Section 2: Kinetic Studio Marquee Ribbon */}
         <Marquee />
 
-        {/* Section 3: High-Contrast Ethos Statement ("I BUILD FRONT / I TEST EVERYTHING") */}
-        <Statement onOpenContact={handleOpenContact} />
+        {/* Section 3: High-Contrast Ethos Statement */}
+        <Statement onOpenContact={() => handleStartProject('business')} />
 
-        {/* Section 4: Capabilities ("WHAT I WORK WITH" — Interactive Highlight Rows) */}
-        <Services onSelectServiceForContact={() => handleOpenContact('direct')} />
+        {/* Section 4: Capabilities & Core Offerings */}
+        <Services onSelectServiceForContact={(serviceId) => handleStartProject(serviceId)} />
 
-        {/* Section 5: Measurable Engineering ("BEFORE ⨂ AFTER" — CWV & Speed Comparison) */}
+        {/* Section 5: Engineering Standards & Production Benchmarks */}
         <div id="impact">
           <ImpactComparison />
         </div>
 
-        {/* Section 6: Color-Blocked Editorial Showcase ("SELECTED WORK" — Real Projects) */}
+        {/* Section 6: Editorial Showcase (Selected Work) */}
         <ProjectGrid onSelectProject={setActiveModalProject} />
 
-        {/* Section 7: Four-Stage Working Process ("HOW THE WORK GOES" — Numbered Badges) */}
+        {/* Section 7: Five-Stage Working Process */}
         <Process />
 
-        {/* Section 8: Digital Marketing Agency Collaboration */}
-        <Collaboration onOpenContact={() => handleOpenContact('agency')} />
+        {/* Section 8: Start a Project (Project Enquiry Experience) */}
+        <StartProject
+          preselectedType={selectedProjectType}
+          defaultIntent={projectIntent}
+        />
 
-        {/* Section 9: About Charles Naveen (Values, Degree & Guiding Pillars) */}
+        {/* Section 9: Digital Marketing Agency Collaboration */}
+        <Collaboration onOpenContact={() => handleStartProject('agency')} />
+
+        {/* Section 10: About Charles Naveen */}
         <About />
 
-        {/* Section 10: Closing Screen ("WRITE ME →" / Let's Build Something Meaningful) */}
+        {/* Section 11: Closing Screen / Form */}
         <Contact defaultIntent={contactIntent} />
       </main>
 

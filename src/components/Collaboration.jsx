@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, Check, ShieldCheck, Clock, Layers, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Check, ShieldCheck, Clock, Layers, UserCheck } from 'lucide-react';
 import { agencyCollaboration } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { gsap, prefersReducedMotion } from '../utils/motion';
@@ -34,7 +34,7 @@ export default function Collaboration({ onOpenContact }) {
         },
         y: 40,
         opacity: 0,
-        stagger: 0.12,
+        stagger: 0.1,
         duration: 0.75,
         ease: 'power3.out'
       });
@@ -74,9 +74,9 @@ export default function Collaboration({ onOpenContact }) {
     if (onOpenContact) {
       onOpenContact('agency');
     } else {
-      const contactEl = document.querySelector('#contact');
-      if (contactEl) {
-        contactEl.scrollIntoView({ behavior: 'smooth' });
+      const target = document.querySelector('#start-project') || document.querySelector('#contact');
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
       }
     }
   };
@@ -90,7 +90,7 @@ export default function Collaboration({ onOpenContact }) {
             <span className="studio-tag">{agencyCollaboration.eyebrow}</span>
             <span style={{ color: 'var(--border-medium)' }}>/</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-              DEV PARTNERSHIP
+              WHITE-LABEL &amp; SUBCONTRACTING
             </span>
           </div>
           <h2 className="collaboration-monument-title">
@@ -99,6 +99,27 @@ export default function Collaboration({ onOpenContact }) {
           <p className="section-lead">
             {agencyCollaboration.body}
           </p>
+
+          {/* Independent Developer Clarification */}
+          <div style={{
+            marginTop: '1.25rem',
+            padding: '0.85rem 1.15rem',
+            backgroundColor: 'var(--bg-surface-elevated)',
+            borderLeft: '2px solid var(--accent-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem'
+          }}>
+            <UserCheck size={16} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+            <p style={{
+              fontSize: 'var(--text-xs)',
+              color: 'var(--text-secondary)',
+              lineHeight: 1.5,
+              margin: 0
+            }}>
+              {agencyCollaboration.independentStatement}
+            </p>
+          </div>
         </div>
 
         {/* Bento Grid of Agency Capabilities */}
@@ -135,11 +156,11 @@ export default function Collaboration({ onOpenContact }) {
             className="btn-agency-cta"
             onClick={handleCtaClick}
           >
-            <span>DISCUSS AN AGENCY PARTNERSHIP</span>
+            <span>DISCUSS A PARTNERSHIP</span>
             <ArrowUpRight size={16} aria-hidden="true" />
           </button>
           <span className="agency-nda-note">
-            Strict NDA confidentiality · Git version controlled · Fixed project or sprint retainers
+            Strict NDA confidentiality · Clean Git version control · Direct developer communication
           </span>
         </div>
       </div>

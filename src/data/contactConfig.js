@@ -7,11 +7,15 @@
  */
 
 export const contactConfig = {
-  // Replace with your verified email address:
-  emailPlaceholder: 'charles.webdev@example.com', // [REPLACEABLE]
+  // Verified Contact Details
+  emailPlaceholder: 'naveen.charles03@gmail.com',
   
-  // Replace with your verified WhatsApp number in international format (e.g., '919876543210'):
-  whatsappPlaceholder: '919000000000', // [REPLACEABLE]
+  // WhatsApp Number in international format (+91 for India):
+  whatsappPlaceholder: '919384959626',
+
+  // Raw and Display Phone
+  phoneRaw: '9384959626',
+  phoneDisplay: '+91 93849 59626',
   
   // Location & Base
   location: 'Tamil Nadu, India',

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, ArrowDown, ExternalLink } from 'lucide-react';
+import { ArrowUpRight, ArrowDown, ExternalLink, Download } from 'lucide-react';
 import { featuredProject } from '../data/projects';
 import { useMagnetic } from '../hooks/useMagnetic';
 import { gsap, prefersReducedMotion } from '../utils/motion';
@@ -8,6 +8,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
   const rootRef = useRef(null);
   const magneticPrimaryRef = useMagnetic(0.25);
   const magneticSecondaryRef = useMagnetic(0.2);
+  const magneticPdfRef = useMagnetic(0.2);
   const badgeRef = useRef(null);
 
   useEffect(() => {
@@ -94,14 +95,14 @@ export default function Hero({ onOpenContact, onSelectProject }) {
           <div className="hero-meta-left">
             <span className="hero-meta-name">CHARLES NAVEEN</span>
             <span className="meta-sep" aria-hidden="true">/</span>
-            <span className="hero-meta-role">Creative Web Developer</span>
+            <span className="hero-meta-role">Freelance Web Developer</span>
             <span className="meta-sep" aria-hidden="true">/</span>
             <span className="hero-meta-loc">Tamil Nadu, India</span>
           </div>
 
           <div className="hero-availability-badge" role="status">
             <span className="pulse-dot" aria-hidden="true"></span>
-            <span>AVAILABLE FOR Q1/Q2 PROJECTS</span>
+            <span>AVAILABLE FOR CLIENT BUILDS &amp; AGENCY PARTNERSHIPS</span>
           </div>
         </div>
 
@@ -112,7 +113,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
               <h1 className="hero-giant-heading">
                 CHARLES
               </h1>
-              {/* Circular Interactive DEV Badge (Demo.mp4 Style) */}
+              {/* Circular Interactive DEV Badge */}
               <div ref={badgeRef} className="circular-dev-badge" aria-hidden="true">
                 <svg className="badge-rotating-text" viewBox="0 0 100 100">
                   <path
@@ -122,7 +123,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
                   />
                   <text>
                     <textPath href="#circlePath" startOffset="0%">
-                      ★ CREATIVE DEVELOPER ★ WEB CRAFT
+                      ★ FREELANCE WEB DEV ★ CLEAN REACT
                     </textPath>
                   </text>
                 </svg>
@@ -137,7 +138,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
                 NAVEEN
               </h1>
               <span className="hero-heading-tagline">
-                [WEB ARCHITECT &amp; DIGITAL CRAFTSMAN]
+                [FREELANCE WEB DEVELOPER]
               </span>
             </div>
           </div>
@@ -158,7 +159,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
                 <div className="visual-card-overlay">
                   <div className="visual-card-pill">
                     <span className="visual-pill-dot" aria-hidden="true"></span>
-                    <span>LATEST PRODUCTION BUILD</span>
+                    <span>CLIENT PROJECT · PRODUCTION BUILD</span>
                   </div>
                   <span className="visual-project-title">{featuredProject.title}</span>
                 </div>
@@ -166,7 +167,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
 
               <div className="visual-card-caption">
                 <div className="caption-text">
-                  <span className="caption-client">Bexley LifeScience · Live Build</span>
+                  <span className="caption-client">Bexley LifeScience · Client Build</span>
                   <span className="caption-scope">Custom React · Corporate Distribution</span>
                 </div>
                 <a
@@ -174,7 +175,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="visual-link-icon"
-                  aria-label="Visit Bexley LifeScience live website"
+                  aria-label="Visit Bexley LifeScience live client website"
                 >
                   <ExternalLink size={14} />
                 </a>
@@ -186,10 +187,20 @@ export default function Hero({ onOpenContact, onSelectProject }) {
         {/* Narrative & Action Cluster */}
         <div className="hero-lower-grid">
           <div className="hero-narrative-box">
+            <h2 className="hero-value-headline" style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1.5rem, 2.5vw, 2.25rem)',
+              color: 'var(--text-primary)',
+              lineHeight: 1.25,
+              marginBottom: '1rem',
+              fontWeight: 800,
+              letterSpacing: '-0.02em'
+            }}>
+              Websites built to turn business attention into enquiries.
+            </h2>
             <p className="hero-lead-text">
-              I build high-performance business websites, digital experiences, and AI-powered solutions.
-              Combining sharp visual art direction, responsive React engineering, and dependable execution
-              for ambitious businesses and agency partners.
+              I design and develop modern, responsive websites for businesses and partner with marketing agencies
+              to deliver polished digital experiences, reliable functionality, and performance-focused implementations.
             </p>
           </div>
 
@@ -210,8 +221,19 @@ export default function Hero({ onOpenContact, onSelectProject }) {
               className="btn-hero-secondary"
               onClick={handleScrollToWork}
             >
-              <span>EXPLORE SELECTED WORK</span>
+              <span>EXPLORE WORK</span>
               <ArrowDown size={15} aria-hidden="true" />
+            </a>
+
+            <a
+              ref={magneticPdfRef}
+              href="/charles-naveen-portfolio.pdf"
+              download="Charles-Naveen-Portfolio.pdf"
+              className="btn-hero-secondary btn-hero-pdf"
+              title="Download compact portfolio PDF for agency review"
+            >
+              <Download size={14} aria-hidden="true" />
+              <span>PORTFOLIO PDF</span>
             </a>
           </div>
         </div>
@@ -222,7 +244,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
             <span className="fact-number">01</span>
             <div className="fact-info">
               <span className="fact-label">CORE STACK</span>
-              <span className="fact-value">React · Vite · Modern CSS</span>
+              <span className="fact-value">React 18 · Modern CSS · Vite</span>
             </div>
           </div>
 
@@ -230,7 +252,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
             <span className="fact-number">02</span>
             <div className="fact-info">
               <span className="fact-label">PRIMARY FOCUS</span>
-              <span className="fact-value">Business Sites &amp; Agency Partnerships</span>
+              <span className="fact-value">Business Websites &amp; Agency Subcontracting</span>
             </div>
           </div>
 
@@ -238,7 +260,7 @@ export default function Hero({ onOpenContact, onSelectProject }) {
             <span className="fact-number">03</span>
             <div className="fact-info">
               <span className="fact-label">LOCATION</span>
-              <span className="fact-value">Tamil Nadu, India · Global Remote</span>
+              <span className="fact-value">Tamil Nadu, India · Remote Worldwide</span>
             </div>
           </div>
         </div>
