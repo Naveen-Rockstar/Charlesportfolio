@@ -1,10 +1,146 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-// Default Supabase project URL for Charles Naveen Portfolio
+// Attempt to load local .env if running in Node runtime with native support
+try {
+  if (typeof process.loadEnvFile === 'function') {
+    process.loadEnvFile();
+  }
+} catch {
+  // Silent catch: file does not exist (expected in production Vercel container)
+}
+
+// Default constants
 const DEFAULT_SUPABASE_URL = 'https://eawlkwgsedswftjaqfaf.supabase.co';
 const DEFAULT_TO_EMAIL = 'naveen.charles03@gmail.com';
 const DEFAULT_FROM_EMAIL = 'Charles Portfolio <onboarding@resend.dev>';
+
+/**
+ * Strips surrounding quotes and whitespace from environment variable values
+ */
+export function sanitizeEnvValue(val) {
+  if (typeof val !== 'string') return '';
+  let cleaned = val.trim();
+  if (
+    (cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+    (cleaned.startsWith("'") && cleaned.endsWith("'"))
+  ) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  return cleaned;
+}
+
+/**
+ * Robustly retrieves environment variables handling:
+ * - Direct lookup
+ * - Fallback names (e.g. VITE_ prefix from Vite conventions)
+ * - Trailing/leading whitespace in key names from dashboard copy-paste
+ * - Case-insensitive match on Linux containers
+ */
+export function getEnvVar(primaryName, fallbackNames = []) {
+  const candidates = [primaryName, ...fallbackNames];
+
+  // 1. Direct match
+  for (const name of candidates) {
+    const val = process.env[name];
+    if (typeof val === 'string' && val.trim().length > 0) {
+      return sanitizeEnvValue(val);
+    }
+  }
+
+  // 2. Trimmed key match or case-insensitive match from process.env keys
+  const envKeys = Object.keys(process.env);
+  for (const name of candidates) {
+    const target = name.trim().toLowerCase();
+    const matchedKey = envKeys.find((k) => k.trim().toLowerCase() === target);
+    if (matchedKey) {
+      const val = process.env[matchedKey];
+      if (typeof val === 'string' && val.trim().length > 0) {
+        return sanitizeEnvValue(val);
+      }
+    }
+  }
+
+  return undefined;
+}
+
+export function getResendApiKey() {
+  return getEnvVar('RESEND_API_KEY', [
+    'VITE_RESEND_API_KEY',
+    'RESEND_KEY',
+    'RESEND_TOKEN',
+    'RESEND_SECRET'
+  ]);
+}
+
+export function getNotificationToEmail() {
+  return (
+    getEnvVar('NOTIFICATION_TO_EMAIL', [
+      'VITE_NOTIFICATION_TO_EMAIL',
+      'TO_EMAIL',
+      'NOTIFICATION_EMAIL'
+    ]) || DEFAULT_TO_EMAIL
+  );
+}
+
+export function getNotificationFromEmail() {
+  return (
+    getEnvVar('NOTIFICATION_FROM_EMAIL', [
+      'VITE_NOTIFICATION_FROM_EMAIL',
+      'FROM_EMAIL',
+      'RESEND_FROM_EMAIL'
+    ]) || DEFAULT_FROM_EMAIL
+  );
+}
+
+export function getSupabaseCredentials() {
+  const url =
+    getEnvVar('SUPABASE_URL', ['VITE_SUPABASE_URL']) || DEFAULT_SUPABASE_URL;
+
+  const key = getEnvVar('SUPABASE_SERVICE_ROLE_KEY', [
+    'VITE_SUPABASE_SERVICE_ROLE_KEY',
+    'SUPABASE_SERVICE_KEY',
+    'SUPABASE_SECRET_KEY',
+    'SUPABASE_KEY',
+    'SUPABASE_ANON_KEY',
+    'VITE_SUPABASE_ANON_KEY'
+  ]);
+
+  return { url, key };
+}
+
+/**
+ * Returns safe diagnostic information that reveals key existence and metadata,
+ * NEVER revealing secret values.
+ */
+export function getSafeResendDiagnostics() {
+  const directKey = Boolean(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
+  const viteKey = Boolean(process.env.VITE_RESEND_API_KEY && process.env.VITE_RESEND_API_KEY.trim());
+  const resolvedKey = getResendApiKey();
+  const isResolved = Boolean(resolvedKey);
+
+  const matchedEnvKeys = Object.keys(process.env)
+    .filter((k) => /resend|email/i.test(k.trim()))
+    .map((k) => {
+      const val = process.env[k];
+      return {
+        keyName: k,
+        length: typeof val === 'string' ? val.length : 0,
+        hasQuotes:
+          typeof val === 'string' &&
+          ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
+      };
+    });
+
+  return {
+    has_RESEND_API_KEY: directKey,
+    has_VITE_RESEND_API_KEY: viteKey,
+    is_resend_resolved: isResolved,
+    detected_email_env_keys: matchedEnvKeys,
+    vercel_env: process.env.VERCEL_ENV || 'not_set',
+    node_env: process.env.NODE_ENV || 'not_set'
+  };
+}
 
 /**
  * Generates plain-text representation of the enquiry for email clients
@@ -334,8 +470,7 @@ export default async function handler(req, res) {
     }
 
     // 3. Supabase Integration
-    const supabaseUrl = process.env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const { url: supabaseUrl, key: supabaseKey } = getSupabaseCredentials();
 
     if (!supabaseKey) {
       console.error('[CONFIG_ERROR] SUPABASE_SERVICE_ROLE_KEY environment variable is missing.');
@@ -384,13 +519,19 @@ export default async function handler(req, res) {
     // 4. Resend Email Notification Integration
     let emailSent = false;
     let emailError = null;
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const resendApiKey = getResendApiKey();
+    const resendDiagnostics = getSafeResendDiagnostics();
+
+    // Safe Diagnostic Log (Never logs key values)
+    console.log('[CONFIG_DIAGNOSTIC] Resend configuration check:', JSON.stringify(resendDiagnostics));
 
     if (resendApiKey) {
       try {
         const resend = new Resend(resendApiKey);
-        const toEmail = process.env.NOTIFICATION_TO_EMAIL || DEFAULT_TO_EMAIL;
-        const fromEmail = process.env.NOTIFICATION_FROM_EMAIL || DEFAULT_FROM_EMAIL;
+        const toEmail = getNotificationToEmail();
+        const fromEmail = getNotificationFromEmail();
+
+        console.log(`[EMAIL_DISPATCH] Attempting email notification to: ${toEmail} from: ${fromEmail}`);
 
         const emailResult = await resend.emails.send({
           from: fromEmail,
@@ -424,14 +565,14 @@ export default async function handler(req, res) {
           emailError = emailResult.error.message || 'Resend error';
         } else {
           emailSent = true;
-          console.log('[NOTIFICATION_SUCCESS] Resend email dispatched for enquiry:', enquiryId);
+          console.log('[NOTIFICATION_SUCCESS] Resend email dispatched for enquiry:', enquiryId, 'Email ID:', emailResult?.data?.id);
         }
       } catch (err) {
         console.error('[EMAIL_EXCEPTION] Failed to dispatch Resend notification:', err);
         emailError = err.message;
       }
     } else {
-      console.warn('[CONFIG_NOTICE] RESEND_API_KEY not configured. Email notification skipped.');
+      console.warn('[CONFIG_NOTICE] RESEND_API_KEY not configured. Email notification skipped.', resendDiagnostics);
     }
 
     // 5. Successful Response
@@ -440,7 +581,8 @@ export default async function handler(req, res) {
       message: 'Enquiry successfully submitted and recorded.',
       enquiryId,
       emailSent,
-      emailNotice: !resendApiKey ? 'RESEND_API_KEY not set yet' : emailError ? emailError : undefined
+      emailNotice: !resendApiKey ? 'RESEND_API_KEY not set yet' : emailError ? emailError : undefined,
+      diagnostics: !resendApiKey ? resendDiagnostics : undefined
     });
   } catch (err) {
     console.error('[SERVER_ERROR] Unexpected error in enquiry handler:', err);
