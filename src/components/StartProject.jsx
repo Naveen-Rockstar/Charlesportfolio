@@ -9,7 +9,8 @@ import {
   AlertCircle,
   Building2,
   Briefcase,
-  FileCheck2
+  FileCheck2,
+  Loader2
 } from 'lucide-react';
 import { projectEnquiryData } from '../data/projects';
 import { contactConfig } from '../data/contactConfig';
@@ -30,21 +31,35 @@ const COUNTRY_CODES = [
   { code: '+other', country: 'GL', label: 'Other' }
 ];
 
-export default function StartProject() {
+export default function StartProject({ preselectedType = null, defaultIntent = 'business' }) {
   const rootRef = useRef(null);
   const magneticSubmitBtnRef = useMagnetic(0.2);
 
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     countryCode: '+91',
     phone: '',
-    projectDetails: ''
+    businessName: '',
+    projectType: preselectedType || (defaultIntent === 'agency' ? 'agency-whitelabel' : 'business-corporate'),
+    budget: 'flexible',
+    projectDetails: '',
+    _gotcha: ''
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [submittedData, setSubmittedData] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (preselectedType) {
+      setFormData((prev) => ({ ...prev, projectType: preselectedType }));
+    } else if (defaultIntent === 'agency') {
+      setFormData((prev) => ({ ...prev, projectType: 'agency-whitelabel' }));
+    }
+  }, [preselectedType, defaultIntent]);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -100,6 +115,9 @@ export default function StartProject() {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
+    if (submitError) {
+      setSubmitError(null);
+    }
   };
 
   const validate = () => {
@@ -108,6 +126,13 @@ export default function StartProject() {
       errs.name = 'Please enter your name.';
     } else if (formData.name.trim().length < 2) {
       errs.name = 'Name must be at least 2 characters.';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim()) {
+      errs.email = 'Please enter your email address.';
+    } else if (!emailRegex.test(formData.email.trim())) {
+      errs.email = 'Please enter a valid email address.';
     }
 
     const cleanPhone = formData.phone.replace(/[\s\-()]/g, '');
@@ -120,7 +145,7 @@ export default function StartProject() {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -129,28 +154,73 @@ export default function StartProject() {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    setSubmitError(null);
+
+    const fullPhone =
+      formData.countryCode === '+other'
+        ? formData.phone.trim()
+        : `${formData.countryCode} ${formData.phone.trim()}`;
+
+    try {
+      const response = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: fullPhone,
+          businessName: formData.businessName.trim(),
+          projectType: formData.projectType,
+          budget: formData.budget,
+          message: formData.projectDetails.trim(),
+          source: 'start-project-section',
+          _gotcha: formData._gotcha
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to submit enquiry. Please try again.');
+      }
+
+      setSubmittedData({
+        ...formData,
+        fullPhone
+      });
+    } catch (err) {
+      console.error('[SUBMISSION_ERROR]', err);
+      setSubmitError(
+        err.message || 'Unable to submit enquiry right now. Please try again or reach out directly.'
+      );
+    } finally {
       setIsSubmitting(false);
-      setSubmittedData({ ...formData });
-    }, 200);
+    }
   };
 
   const handleReset = () => {
     setSubmittedData(null);
     setFormData({
       name: '',
+      email: '',
       countryCode: '+91',
       phone: '',
-      projectDetails: ''
+      businessName: '',
+      projectType: preselectedType || (defaultIntent === 'agency' ? 'agency-whitelabel' : 'business-corporate'),
+      budget: 'flexible',
+      projectDetails: '',
+      _gotcha: ''
     });
     setErrors({});
+    setSubmitError(null);
     setCopied(false);
   };
 
   const getFullPhone = () => {
     if (!submittedData) return '';
-    const prefix = submittedData.countryCode === '+other' ? '' : `${submittedData.countryCode} `;
-    return `${prefix}${submittedData.phone.trim()}`;
+    return submittedData.fullPhone || submittedData.phone;
   };
 
   const getEnquirySummaryText = () => {
@@ -163,7 +233,11 @@ export default function StartProject() {
       `Project Enquiry for Charles Naveen\n` +
       `===================================\n` +
       `• Name: ${submittedData.name.trim()}\n` +
+      `• Email: ${submittedData.email.trim()}\n` +
       `• Mobile / WhatsApp: ${getFullPhone()}\n` +
+      (submittedData.businessName ? `• Business: ${submittedData.businessName.trim()}\n` : '') +
+      `• Type: ${submittedData.projectType}\n` +
+      `• Budget: ${submittedData.budget}\n` +
       `• Project Details:\n${details}\n\n` +
       `Sent via Charles Naveen Portfolio`
     );
@@ -185,8 +259,10 @@ export default function StartProject() {
     const message =
       `Hi Charles, I am submitting an enquiry from your portfolio:\n\n` +
       `• Name: ${submittedData.name.trim()}\n` +
+      `• Email: ${submittedData.email.trim()}\n` +
       `• Mobile / WhatsApp: ${getFullPhone()}\n` +
-      `• Project Details: ${details}`;
+      (submittedData.businessName ? `• Business: ${submittedData.businessName.trim()}\n` : '') +
+      `• Details: ${details}`;
 
     return `https://wa.me/${contactConfig.whatsappPlaceholder}?text=${encodeURIComponent(message)}`;
   };
@@ -264,7 +340,7 @@ export default function StartProject() {
               <span className="enquiry-card-eyebrow">DIRECT INQUIRY</span>
               <h3 className="enquiry-card-title">LET'S TALK ABOUT YOUR PROJECT</h3>
               <p className="enquiry-card-subtitle">
-                Share your details and I'll get back to you.
+                Share your details and I'll get back to you promptly.
               </p>
             </div>
             <span className="enquiry-response-tag">
@@ -277,10 +353,10 @@ export default function StartProject() {
               <div className="success-icon-wrap">
                 <CheckCircle2 size={40} className="success-check-icon" aria-hidden="true" />
               </div>
-              <h3 className="success-heading">Enquiry Ready to Dispatch</h3>
+              <h3 className="success-heading">Enquiry Successfully Recorded</h3>
               <p className="success-subtext">
-                Thank you, <strong>{submittedData.name}</strong>. Your enquiry details have been formatted.
-                To ensure immediate delivery with zero lost messages or unmonitored queues, choose your direct contact route:
+                Thank you, <strong>{submittedData.name}</strong>. Your enquiry details have been securely stored in
+                the database and an email notification has been prepared. Choose your direct contact route below for immediate discussion:
               </p>
 
               <div className="brief-preview-box">
@@ -331,80 +407,168 @@ export default function StartProject() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate className="enquiry-form-body">
-              {/* Field 1: Name (Required) */}
-              <div className="form-group">
-                <label htmlFor="enquiry-name" className="input-label">
-                  Name <span className="req-star">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="enquiry-name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Your full name"
-                  className="editorial-input"
-                  aria-required="true"
-                  aria-invalid={!!errors.name}
-                  autoComplete="name"
-                />
-                {errors.name && (
-                  <span className="error-note" role="alert">
-                    {errors.name}
-                  </span>
-                )}
+              {/* Honeypot Field for Spam Protection */}
+              <input
+                type="text"
+                name="_gotcha"
+                value={formData._gotcha}
+                onChange={handleChange}
+                style={{ display: 'none' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+
+              {/* Row 1: Name & Email */}
+              <div className="form-fields-row">
+                <div className="form-group">
+                  <label htmlFor="enquiry-name" className="input-label">
+                    Name <span className="req-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="enquiry-name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Your full name"
+                    className="editorial-input"
+                    aria-required="true"
+                    aria-invalid={!!errors.name}
+                    autoComplete="name"
+                  />
+                  {errors.name && (
+                    <span className="error-note" role="alert">
+                      {errors.name}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="enquiry-email" className="input-label">
+                    Email Address <span className="req-star">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="enquiry-email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="you@company.com"
+                    className="editorial-input"
+                    aria-required="true"
+                    aria-invalid={!!errors.email}
+                    autoComplete="email"
+                  />
+                  {errors.email && (
+                    <span className="error-note" role="alert">
+                      {errors.email}
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Field 2: Mobile Number / WhatsApp (Required, with Country Code Support) */}
-              <div className="form-group">
-                <label htmlFor="enquiry-phone" className="input-label">
-                  Mobile Number / WhatsApp <span className="req-star">*</span>
-                </label>
-                <div className="phone-input-row" style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                  <select
-                    id="enquiry-country-code"
-                    name="countryCode"
-                    value={formData.countryCode}
+              {/* Row 2: Mobile / WhatsApp & Business Name */}
+              <div className="form-fields-row">
+                <div className="form-group">
+                  <label htmlFor="enquiry-phone" className="input-label">
+                    Mobile Number / WhatsApp <span className="req-star">*</span>
+                  </label>
+                  <div className="phone-input-row">
+                    <select
+                      id="enquiry-country-code"
+                      name="countryCode"
+                      value={formData.countryCode}
+                      onChange={handleChange}
+                      className="editorial-select phone-code-select"
+                      aria-label="Country Code"
+                    >
+                      {COUNTRY_CODES.map((item) => (
+                        <option key={item.code} value={item.code}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="tel"
+                        id="enquiry-phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="93849 59626"
+                        className="editorial-input"
+                        aria-required="true"
+                        aria-invalid={!!errors.phone}
+                        autoComplete="tel-national"
+                      />
+                    </div>
+                  </div>
+                  {errors.phone && (
+                    <span className="error-note" role="alert">
+                      {errors.phone}
+                    </span>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="enquiry-business" className="input-label">
+                    Business / Brand Name <span className="opt-tag">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="enquiry-business"
+                    name="businessName"
+                    value={formData.businessName}
                     onChange={handleChange}
-                    className="editorial-select phone-code-select"
-                    style={{
-                      width: 'auto',
-                      minWidth: '120px',
-                      flexShrink: 0,
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.85rem'
-                    }}
-                    aria-label="Country Code"
+                    placeholder="Company, Clinic, or Agency"
+                    className="editorial-input"
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: Requirement Type & Estimated Budget */}
+              <div className="form-fields-row">
+                <div className="form-group">
+                  <label htmlFor="enquiry-project-type" className="input-label">
+                    Requirement Type
+                  </label>
+                  <select
+                    id="enquiry-project-type"
+                    name="projectType"
+                    value={formData.projectType}
+                    onChange={handleChange}
+                    className="editorial-select"
                   >
-                    {COUNTRY_CODES.map((item) => (
-                      <option key={item.code} value={item.code}>
-                        {item.label}
+                    {projectEnquiryData.projectTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
                       </option>
                     ))}
                   </select>
-                  <div style={{ flex: 1 }}>
-                    <input
-                      type="tel"
-                      id="enquiry-phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="93849 59626"
-                      className="editorial-input"
-                      aria-required="true"
-                      aria-invalid={!!errors.phone}
-                      autoComplete="tel-national"
-                    />
-                  </div>
                 </div>
-                {errors.phone && (
-                  <span className="error-note" role="alert">
-                    {errors.phone}
-                  </span>
-                )}
+
+                <div className="form-group">
+                  <label htmlFor="enquiry-budget" className="input-label">
+                    Estimated Budget
+                  </label>
+                  <select
+                    id="enquiry-budget"
+                    name="budget"
+                    value={formData.budget}
+                    onChange={handleChange}
+                    className="editorial-select"
+                  >
+                    {projectEnquiryData.budgets.map((tier) => (
+                      <option key={tier.value} value={tier.value}>
+                        {tier.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Field 3: Project Details (Optional) */}
+              {/* Field 4: Project Details (Optional) */}
               <div className="form-group">
                 <label htmlFor="enquiry-details" className="input-label">
                   Project Details <span className="opt-tag">(Optional)</span>
@@ -414,11 +578,36 @@ export default function StartProject() {
                   name="projectDetails"
                   value={formData.projectDetails}
                   onChange={handleChange}
-                  placeholder="Briefly tell me what you need."
+                  placeholder="Briefly tell me what you need (e.g., goals, page requirements, reference sites, timeline)."
                   rows={4}
                   className="editorial-textarea"
                 ></textarea>
               </div>
+
+              {/* Submission Error Banner */}
+              {submitError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.65rem',
+                    padding: '0.85rem 1rem',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                    border: '1.5px solid #D32F2F',
+                    color: '#B71C1C',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.8rem',
+                    lineHeight: 1.5
+                  }}
+                  role="alert"
+                >
+                  <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px', color: '#D32F2F' }} />
+                  <div>
+                    <strong>Notice:</strong> {submitError}
+                  </div>
+                </div>
+              )}
 
               {/* Single Prominent Lime-Green Submit Button */}
               <div className="enquiry-submit-row" style={{ marginTop: '0.75rem' }}>
@@ -429,7 +618,10 @@ export default function StartProject() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <span>PREPARING ENQUIRY...</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Loader2 size={16} className="spin-animation" />
+                      <span>SUBMITTING ENQUIRY...</span>
+                    </span>
                   ) : (
                     <span>Send Enquiry ↗</span>
                   )}
